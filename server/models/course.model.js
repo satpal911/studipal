@@ -14,10 +14,14 @@ const courseSchema = new mongoose.Schema({
         enum: ["IT", "Marketing", "Language"],
         required: true
     },
-    thumbnail: { // unified name for consistency
-        type: String,
-        required: true
-    },
+   thumbnail: { 
+  type: String, 
+  required: function () { 
+    // Only require thumbnail when adding a new course
+    return this.status === "pending";
+  } 
+},
+
     mentor: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Mentor"
