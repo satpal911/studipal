@@ -1,13 +1,29 @@
-const express = require("express")
-const { addLesson, getAllLessons, getOneLesson, deleteLesson, updateLesson } = require("../controllers/lesson.controller")
-const mentorAuthentication = require("../middleware/auth.mentor")
+const express = require("express");
+const {
+  addLesson,
+  getAllLessons,
+  getOneLesson,
+  deleteLesson,
+  updateLesson,
+} = require("../controllers/lesson.controller");
 
-const lessonRouter = express.Router()
+const mentorAuthentication = require("../middleware/auth.mentor");
+const userAuthentication = require("../middleware/auth.user");
 
-lessonRouter.post("/add-lesson", mentorAuthentication,addLesson)
-lessonRouter.get("/get-all-lessons", mentorAuthentication,getAllLessons)
-lessonRouter.get("/get-one-lesson", mentorAuthentication,getOneLesson)
-lessonRouter.delete("/delete-lesson", mentorAuthentication,deleteLesson)
-lessonRouter.put("/update-lesson", mentorAuthentication,updateLesson)
+const lessonRouter = express.Router();
 
-module.exports = lessonRouter
+// ✅ Mentor: Add, Update, Delete
+lessonRouter.post("/add-lesson/:courseId", mentorAuthentication, addLesson);
+lessonRouter.put("/update-lesson/:lessonId", mentorAuthentication, updateLesson);
+lessonRouter.delete("/delete-lesson/:lessonId", mentorAuthentication, deleteLesson);
+
+// ✅ Mentor sees all lessons of a course
+lessonRouter.get("/mentor/get-all-lessons/:courseId", mentorAuthentication, getAllLessons);
+
+// ✅ User sees all lessons of a course
+lessonRouter.get("/get-all-lessons/:courseId", userAuthentication, getAllLessons);
+
+// ✅ Both mentor & user can see one lesson
+lessonRouter.get("/get-one-lesson/:lessonId", userAuthentication, getOneLesson);
+
+module.exports = lessonRouter;

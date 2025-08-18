@@ -26,10 +26,6 @@ const courseSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: "Mentor"
     },
-    lessons: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Lesson"
-    }],
     studentsEnrolled: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: "User"

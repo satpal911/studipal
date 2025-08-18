@@ -2,6 +2,7 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const Admin = require("../models/admin.model");
 const Course = require("../models/course.model")
+const Mentor = require("../models/mentor.model")
 
 // REGISTER ADMIN
 const registerAdmin = async (req, res) => {
@@ -67,6 +68,49 @@ const loginAdmin = async (req, res) => {
   }
 };
 
+// ADDING MENTOR
+const addMentor = async (req, res) => {
+  try {
+    const { name, email, password } = req.body;
+
+    if (!name || !email || !password) {
+      return res.status(403).json({
+        message: "All fields are required",
+      });
+    }
+
+    const existingMentor = await Mentor.findOne({ email });
+
+    if (existingMentor) {
+      return res.status(403).json({
+        message: "Mentor already registered",
+      });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const mentor = new Mentor({
+      name,
+      email,
+      password: hashedPassword,
+    });
+
+    const savedMentor = await mentor.save();
+
+    res.status(201).json({
+      status: 1,
+      message: "Mentor created successfully",
+      savedMentor,
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: 0,
+      message: `Server error: ${error.message}`,
+    });
+  }
+};
+
+
 // ✅ Approve a pending course
 const approveCourse = async (req, res) => {
   try {
@@ -120,4 +164,4 @@ const rejectCourse = async (req, res) => {
   }
 };
 
-module.exports = { registerAdmin, loginAdmin,approveCourse, rejectCourse };
+module.exports = { registerAdmin, loginAdmin,approveCourse, rejectCourse, addMentor};
