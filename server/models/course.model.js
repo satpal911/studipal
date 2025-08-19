@@ -30,7 +30,7 @@ const courseSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: "User"
     }],
-    status: {
+    status: {                                          //admin will approve or reject
         type: String,
         enum: ["pending", "approved", "rejected"],
         default: "pending"

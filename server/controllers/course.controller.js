@@ -1,8 +1,11 @@
 const Course = require("../models/course.model")
+const cloudinary = require("../utils/cloudinary");
+const fs = require("fs");
 
 const addCourse = async (req, res) => {
   try {
-    const { name, description, category, thumbnail } = req.body;
+    const { name, description, category } = req.body;
+    const thumbnail = req.file
 
     // Validate required fields
     if (!name || !description || !category || !thumbnail) {
@@ -12,11 +15,19 @@ const addCourse = async (req, res) => {
       });
     }
 
+     // Upload thumbnail to Cloudinary
+    const result = await cloudinary.uploader.upload(req.file.path, {
+      folder: "studipal/courses",
+    });
+
+    // remove local file
+    fs.unlinkSync(req.file.path);
+
     const course = new Course({
       name,
       description,
       category,
-      thumbnail, 
+      thumbnail: result.secure_url,
       mentor: req.mentor ? req.mentor._id : undefined, // set from auth if available
       lessons: [], 
       studentsEnrolled: [], 
@@ -66,7 +77,8 @@ const getOneCourse = async(req, res) => {
    try {
      const {id} = req.params
 
-    const oneCourse = await  Course.findById(id)
+    const oneCourse = await  Course.findById(id).populate("mentor", "name email");
+
 
     res.status(200).json({
         status:1,
@@ -104,12 +116,23 @@ const updateCourse = async (req, res) => {
       });
     }
 
+        let newThumbnail = existingCourse.thumbnail;
+
+          // If new thumbnail uploaded
+    if (req.file) {
+      const result = await cloudinary.uploader.upload(req.file.path, {
+        folder: "studipal/courses",
+      });
+      fs.unlinkSync(req.file.path);
+      newThumbnail = result.secure_url;
+    }
+
     // Create a new pending version while keeping the old approved one active
     const pendingCourse = new Course({
       name: name || existingCourse.name,
       description: description || existingCourse.description,
       category: category || existingCourse.category,
-      thumbnail: thumbnail || existingCourse.thumbnail,
+      thumbnail: newThumbnail || existingCourse.thumbnail,
       mentor: existingCourse.mentor,
       lessons: lessons || existingCourse.lessons,
       status: "pending",

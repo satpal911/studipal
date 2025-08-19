@@ -1,4 +1,6 @@
 const express = require("express");
+// const upload = require("../middleware/uploads")
+const cloudinary = require("../utils/cloudinary")
 const {
   addLesson,
   getAllLessons,
@@ -9,11 +11,14 @@ const {
 
 const mentorAuthentication = require("../middleware/auth.mentor");
 const userAuthentication = require("../middleware/auth.user");
+const multer = require("multer");
 
 const lessonRouter = express.Router();
+const storage = multer.memoryStorage();
+const upload = multer({storage:storage})
 
 // ✅ Mentor: Add, Update, Delete
-lessonRouter.post("/add-lesson/:courseId", mentorAuthentication, addLesson);
+lessonRouter.post("/add-lesson/:courseId", mentorAuthentication,upload.single("videoUrl"), addLesson);
 lessonRouter.put("/update-lesson/:lessonId", mentorAuthentication, updateLesson);
 lessonRouter.delete("/delete-lesson/:lessonId", mentorAuthentication, deleteLesson);
 
