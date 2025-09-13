@@ -3,6 +3,7 @@ const jwt = require("jsonwebtoken");
 const Admin = require("../models/admin.model");
 const Course = require("../models/course.model")
 const Mentor = require("../models/mentor.model")
+const User = require("../models/user.model"); // ✅ Add this line
 
 // REGISTER ADMIN
 const registerAdmin = async (req, res) => {
@@ -164,4 +165,68 @@ const rejectCourse = async (req, res) => {
   }
 };
 
-module.exports = { registerAdmin, loginAdmin,approveCourse, rejectCourse, addMentor};
+// ✅ NEW: GET ADMIN STATS
+const getAdminStats = async (req, res) => {
+  try {
+    const totalUsers = await User.countDocuments();
+    const totalMentors = await Mentor.countDocuments();
+    const totalPendingCourses = await Course.countDocuments({ status: "pending" });
+    const totalApprovedCourses = await Course.countDocuments({ status: "approved" });
+    const totalRejectedCourses = await Course.countDocuments({ status: "rejected" });
+    const totalCourses = await Course.countDocuments();
+
+    res.status(200).json({
+      status: 1,
+      message: "Admin stats fetched successfully",
+      data: {
+        totalUsers,
+        totalMentors,
+        totalPendingCourses,
+        totalApprovedCourses,
+        totalRejectedCourses,
+        totalCourses,
+      },
+    });
+  } catch (error) {
+    res.status(500).json({ status: 0, message: `Server error: ${error.message}` });
+  }
+};
+
+// Get all mentors
+const getAllMentors = async (req, res) => {
+  try {
+    const mentors = await Mentor.find().select("-password"); // exclude password if any
+    res.json({
+      status: 1,
+      message: "All mentors fetched successfully",
+      data: mentors,
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: 0,
+      message: "Error fetching mentors",
+      error: error.message,
+    });
+  }
+};
+
+// Get all courses
+const getAllCourses = async (req, res) => {
+  try {
+    const courses = await Course.find().populate("mentor", "name email"); // populate mentor info if needed
+    res.json({
+      status: 1,
+      message: "All courses fetched successfully",
+      data: courses,
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: 0,
+      message: "Error fetching courses",
+      error: error.message,
+    });
+  }
+};
+
+
+module.exports = { registerAdmin, loginAdmin,approveCourse, rejectCourse, addMentor, getAdminStats, getAllMentors, getAllCourses};

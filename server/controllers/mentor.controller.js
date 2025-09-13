@@ -2,7 +2,7 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const Mentor = require("../models/mentor.model");
 
-// REGISTER MENTOR
+// login MENTOR
 // const registerMentor = async (req, res) => {
 //   try {
 //     const { name, email, password } = req.body;

@@ -7,7 +7,7 @@ const userAuthentication = require("../middleware/auth.user")
 const courseRouter = express.Router()
 
 courseRouter.post("/add-course",mentorAuthentication,upload.single("thumbnail"),addCourse)
-courseRouter.get("/get-all-courses", userAuthentication,getAllCourses)
+courseRouter.get("/get-all-courses", userAuthentication,getAllCourses) 
 courseRouter.get("/mentor/get-all-courses", mentorAuthentication,getAllCoursesMentor)
 courseRouter.get("/get-one-course/:id", mentorAuthentication,getOneCourse)
 courseRouter.put("/update-course/:id", mentorAuthentication,updateCourse)

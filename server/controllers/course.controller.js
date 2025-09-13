@@ -77,7 +77,7 @@ const getOneCourse = async(req, res) => {
    try {
      const {id} = req.params
 
-    const oneCourse = await  Course.findById(id).populate("mentor", "name email");
+    const oneCourse = await  Course.findById({_id:id}).populate("mentor", "name email");
 
 
     res.status(200).json({
@@ -99,7 +99,7 @@ const updateCourse = async (req, res) => {
     const { name, description, category, thumbnail, lessons } = req.body;
 
     // Find existing course
-    const existingCourse = await Course.findById(id);
+    const existingCourse = await Course.findById({_id:id});
 
     if (!existingCourse) {
       return res.status(404).json({
@@ -160,7 +160,7 @@ const deleteCourse = async(req, res) => {
     try {
         const {id} = req.params
 
-    const deleteCourse = await Course.findByIdAndDelete(id)
+    const deleteCourse = await Course.findByIdAndDelete({_id:id})
 
     res.status(200).json({
         status:1,
@@ -178,7 +178,8 @@ const deleteCourse = async(req, res) => {
 //  Get all courses for mentor (all statuses)
 const getAllCoursesMentor = async (req, res) => {
     try {
-        const allCoursesMentor = await Course.find({ mentor: req.mentor._id });
+        const allCoursesMentor = await Course.find({ mentor: req.mentor._id }).populate("mentor", "name email"); // optional: show mentor info
+;
         res.status(200).json({
             status: 1,
             message: "All courses of mentor fetched successfully",

@@ -41,6 +41,7 @@ const loginUser = async (req, res) => {
     }
 
     const emailLower = email.trim().toLowerCase();
+    
     const user = await User.findOne({ email: emailLower });
     if (!user) {
       return res.status(400).json({ status: 0, message: "User not registered" });
