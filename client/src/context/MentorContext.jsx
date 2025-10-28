@@ -48,7 +48,7 @@ export const MentorProvider = ({ children }) => {
     setToken(null);
     localStorage.removeItem("mentorToken");
     localStorage.removeItem("role");
-    navigate("/mentor/login");
+     navigate("/", { replace: true });
   };
 
   // ✅ Auto fetch mentor info when token exists

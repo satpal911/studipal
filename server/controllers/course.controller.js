@@ -54,23 +54,22 @@ const addCourse = async (req, res) => {
 
 
 const getAllCourses = async(req, res) => {
-    try {
-        const studentId = req.user._id
-
-    const allCourses = await Course.find({status: "approved"})
+  try {
+    const allCourses = await Course.find({ status: "approved" }).populate("mentor", "name");
 
     res.status(200).json({
-        status:1,
-        message:"All approved courses fetched successfully",
-        data: allCourses
-    })
-    } catch (error) {
-        res.status(500).json({
-            status:0,
-            message:`server error ${error.message}`
-        })
-    }
-}
+      status: 1,
+      message: "All approved courses fetched successfully",
+      data: allCourses, // frontend should use res.data.data
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: 0,
+      message: `Server error ${error.message}`,
+    });
+  }
+};
+
 
 
 const getOneCourse = async(req, res) => {

@@ -4,8 +4,8 @@ const Course = require("../models/course.model");
 // ✅ Enroll a student into a course
 const enrollCourse = async (req, res) => {
   try {
-    const { courseId } = req.params;   // courseId from URL
-    const userId = req.user.id;        // logged-in student (from auth middleware)
+    const { courseId } = req.params;
+    const userId = req.user.id;
 
     // 1. Check if course exists
     const course = await Course.findById(courseId);
@@ -13,7 +13,7 @@ const enrollCourse = async (req, res) => {
       return res.status(404).json({ success: false, message: "Course not found" });
     }
 
-    // 2. Allow enrollment only if course is approved
+    // 2. Allow enrollment only if approved
     if (course.status !== "approved") {
       return res.status(400).json({
         success: false,
@@ -31,7 +31,6 @@ const enrollCourse = async (req, res) => {
     const alreadyEnrolled = user.enrolledCourses.some(
       (enrolled) => enrolled.courseId.toString() === courseId.toString()
     );
-
     if (alreadyEnrolled) {
       return res.status(400).json({
         success: false,
@@ -42,7 +41,7 @@ const enrollCourse = async (req, res) => {
     // 5. Add enrollment
     user.enrolledCourses.push({
       courseId,
-      status: "pending",   // default enrollment status
+      status: "pending",
       progress: 0,
       enrolledAt: new Date(),
     });
@@ -60,7 +59,7 @@ const enrollCourse = async (req, res) => {
   }
 };
 
-// ✅ Get only approved enrolled courses (with mentor details)
+// ✅ Get enrolled courses (returns only course objects)
 const getEnrolled = async (req, res) => {
   try {
     const userId = req.user.id;
@@ -68,7 +67,7 @@ const getEnrolled = async (req, res) => {
     const user = await User.findById(userId).populate({
       path: "enrolledCourses.courseId",
       model: "Course",
-      match: { status: "approved" }, // fetch only approved courses
+      match: { status: "approved" },
       populate: {
         path: "mentor",
         model: "Mentor",
@@ -76,7 +75,10 @@ const getEnrolled = async (req, res) => {
       }
     });
 
-    const approvedCourses = user.enrolledCourses.filter(c => c.courseId !== null);
+    // extract only populated courses
+    const approvedCourses = user.enrolledCourses
+      .filter(c => c.courseId !== null)
+      .map(c => c.courseId);
 
     res.status(200).json({
       success: true,
@@ -92,36 +94,4 @@ const getEnrolled = async (req, res) => {
   }
 };
 
-// ✅ Get pending enrolled courses (student can see what’s waiting for approval)
-const getPendingEnrollments = async (req, res) => {
-  try {
-    const userId = req.user.id;
-
-    const user = await User.findById(userId).populate({
-      path: "enrolledCourses.courseId",
-      model: "Course",
-      match: { status: "pending" },
-      populate: {
-        path: "mentor",
-        model: "Mentor",
-        select: "name email"
-      }
-    });
-
-    const pendingCourses = user.enrolledCourses.filter(c => c.courseId !== null);
-
-    res.status(200).json({
-      success: true,
-      message: "Pending enrolled courses fetched successfully",
-      data: pendingCourses
-    });
-  } catch (error) {
-    console.error("getPendingEnrollments error:", error);
-    res.status(500).json({
-      success: false,
-      message: `Server error: ${error.message}`
-    });
-  }
-};
-
-module.exports = { enrollCourse, getEnrolled, getPendingEnrollments };
+module.exports = { enrollCourse, getEnrolled };

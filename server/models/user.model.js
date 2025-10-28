@@ -36,12 +36,6 @@ const userSchema = new mongoose.Schema(
       required: true,
     },
 
-    // remove this old one if you're not using separate Enroll model
-    // enrollments: {
-    //   type: mongoose.Schema.Types.ObjectId,
-    //   ref: "Enroll",
-    // },
-
     enrolledCourses: [enrolledCourseSchema],   // ✅ structured array
     completedCourses: [
       { type: mongoose.Schema.Types.ObjectId, ref: "Course" }

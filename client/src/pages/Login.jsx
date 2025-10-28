@@ -1,13 +1,21 @@
 // src/pages/UserLogin.jsx
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { useUser } from "../context/UserContext";
 
 export default function UserLogin() {
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [error, setError] = useState("");
+  const navigate = useNavigate();
 
-  const { login, loading } = useUser();
+  const { login, loading, token } = useUser();
+
+  // ✅ Redirect if already logged in
+  useEffect(() => {
+    if (token) {
+      navigate("/user/dashboard", { replace: true });
+    }
+  }, [token, navigate]);
 
   // handle input changes
   const handleChange = (e) => {
@@ -22,7 +30,10 @@ export default function UserLogin() {
     e.preventDefault();
     setError("");
     try {
+      // login function should handle token + user state
       await login(formData.email, formData.password);
+      // ✅ Replace history entry so back button won't return to login
+      navigate("/user/dashboard", { replace: true });
     } catch (err) {
       setError(err);
     }

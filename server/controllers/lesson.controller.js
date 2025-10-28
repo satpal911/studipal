@@ -137,10 +137,27 @@ const deleteLesson = async (req, res) => {
   }
 };
 
+const getCourseLessons = async (req, res) => {
+ try {
+ const { courseId } = req.params;
+ // Retrieve all lessons associated with the course, sorted by order
+ const lessons = await Lesson.find({ courseId }).sort({ order: 1 });
+
+ res.status(200).json({
+  status: 1,
+  message: "Course lessons fetched successfully for admin view",
+  data: lessons,
+ });
+ } catch (error) {
+  res.status(500).json({ status: 0, message: `Server error: ${error.message}` });
+ }
+};
+
 module.exports = {
   addLesson,
   getAllLessons,
   getOneLesson,
   updateLesson,
   deleteLesson,
+  getCourseLessons,
 };

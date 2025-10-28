@@ -40,7 +40,7 @@ export const AdminProvider = ({ children }) => {
     setToken(null);
     localStorage.removeItem("adminToken");
     localStorage.removeItem("role");
-    navigate("/admin/login");
+    navigate("/", { replace: true });
   };
 
   useEffect(() => {

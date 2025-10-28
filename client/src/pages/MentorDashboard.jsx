@@ -1,101 +1,166 @@
-// src/pages/MentorDashboard.jsx
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { useMentor } from "../context/MentorContext";
-import { Users, BookOpen, Clock, LogOut, LayoutDashboard, X, PlusCircle } from "lucide-react";
+import {
+  Users,
+  BookOpen,
+  PlusCircle,
+  LogOut,
+  LayoutDashboard,
+  Clock,
+  CheckCircle,
+  Menu,
+  X,
+} from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 export default function MentorDashboard() {
   const { mentor, token, logout } = useMentor();
+  const navigate = useNavigate();
   const [stats, setStats] = useState({});
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("stats");
+
   const [showAddCourse, setShowAddCourse] = useState(false);
+  const [showAddLesson, setShowAddLesson] = useState(false);
+  const [selectedCourse, setSelectedCourse] = useState(null);
+
+  const [sidebarOpen, setSidebarOpen] = useState(false); // ✅ Mobile sidebar
   const [courseForm, setCourseForm] = useState({
     name: "",
     description: "",
-    thumbnail: "",
+    category: "",
+    thumbnail: null,
   });
 
+  const [lessonForm, setLessonForm] = useState({
+    title: "",
+    content: "",
+    video: null,
+    order: 1,
+  });
+
+  // Fetch courses + stats
+  const fetchCourses = async () => {
+    if (!token) return;
+    try {
+      const headers = { Authorization: `Bearer ${token}` };
+      const res = await axios.get(
+        "http://localhost:3000/api/v1/course/mentor/get-all-courses",
+        { headers, withCredentials: true }
+      );
+      const allCourses = res.data.data || [];
+      setCourses(allCourses);
+
+      const totalCourses = allCourses.length;
+      const pendingCourses = allCourses.filter((c) => c.status === "pending").length;
+      const approvedCourses = allCourses.filter((c) => c.status === "approved").length;
+      setStats({ totalCourses, pendingCourses, approvedCourses });
+    } catch (error) {
+      console.error("Error fetching courses:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchMentorData = async () => {
-      if (!token) return;
-      try {
-        const headers = { Authorization: `Bearer ${token}` };
-
-        // ✅ Get mentor details
-        const mentorRes = await axios.get("http://localhost:3000/api/v1/mentor/me", {
-          headers,
-          withCredentials: true,
-        });
-        // stats example, you can calculate from courses or backend
-        const coursesRes = await axios.get(
-          "http://localhost:3000/api/v1/course/mentor/get-all-courses",
-          { headers, withCredentials: true }
-        );
-        setCourses(coursesRes.data.data || []);
-
-        // Calculate stats from courses
-        const totalCourses = coursesRes.data.data.length;
-        const pendingCourses = coursesRes.data.data.filter(c => c.status === "pending").length;
-        setStats({ totalCourses, pendingCourses });
-      } catch (error) {
-        console.error("Failed to load mentor data:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchMentorData();
+    fetchCourses();
   }, [token]);
 
+  // ================== ADD COURSE ==================
   const handleAddCourse = async (e) => {
     e.preventDefault();
     try {
-      await axios.post(
-        "http://localhost:3000/api/v1/course/add-course",
-        courseForm,
-        { headers: { Authorization: `Bearer ${token}` }, withCredentials: true }
-      );
-      alert("Course added successfully!");
-      setCourseForm({ name: "", description: "", thumbnail: "" });
-      setShowAddCourse(false);
+      const formData = new FormData();
+      formData.append("name", courseForm.name);
+      formData.append("description", courseForm.description);
+      formData.append("category", courseForm.category);
+      if (courseForm.thumbnail) formData.append("thumbnail", courseForm.thumbnail);
 
-      // Refresh courses
-      const res = await axios.get("http://localhost:3000/api/v1/course/mentor/get-all-courses", {
-        headers: { Authorization: `Bearer ${token}` },
+      await axios.post("http://localhost:3000/api/v1/course/add-course", formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "multipart/form-data",
+        },
         withCredentials: true,
       });
-      setCourses(res.data.data || []);
 
-      // Update stats
-      const totalCourses = res.data.data.length;
-      const pendingCourses = res.data.data.filter(c => c.status === "pending").length;
-      setStats({ totalCourses, pendingCourses });
+      alert("✅ Course added successfully!");
+      setCourseForm({ name: "", description: "", category: "", thumbnail: null });
+      setShowAddCourse(false);
+      fetchCourses();
     } catch (error) {
-      console.error("Failed to add course:", error);
-      alert("Error adding course");
+      console.error("❌ Failed to add course:", error);
+      alert(error.response?.data?.message || "Error adding course");
+    }
+  };
+
+  // ================== ADD LESSON ==================
+  const handleAddLesson = async (e) => {
+    e.preventDefault();
+    if (!lessonForm.video) return alert("Please select a video file.");
+
+    try {
+      const formData = new FormData();
+      formData.append("title", lessonForm.title);
+      formData.append("content", lessonForm.content);
+      formData.append("order", lessonForm.order || 1);
+      formData.append("videoUrl", lessonForm.video);
+
+      await axios.post(
+        `http://localhost:3000/api/v1/lesson/add-lesson/${selectedCourse._id}`,
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+
+      alert("✅ Lesson added successfully!");
+      setLessonForm({ title: "", content: "", video: null, order: 1 });
+      setShowAddLesson(false);
+      fetchCourses();
+    } catch (error) {
+      console.error("❌ Lesson error:", error.response?.data || error.message);
+      alert(error.response?.data?.message || "Error adding lesson");
     }
   };
 
   if (loading) return <p className="text-center mt-10">Loading...</p>;
 
+  // ================== COURSE GRID ==================
   const CourseGrid = ({ courses }) => (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
       {courses.map((course) => (
-        <div key={course._id} className="bg-white shadow rounded-xl overflow-hidden">
+        <div key={course._id} className="bg-white shadow rounded-xl overflow-hidden p-4">
           <img
             src={course.thumbnail || "/default-thumbnail.jpg"}
             alt={course.name}
-            className="w-full h-40 object-cover"
+            className="w-full h-40 object-cover rounded-lg"
           />
-          <div className="p-4">
-            <h4 className="font-bold text-lg mb-1">{course.name}</h4>
-            <p className="text-sm text-gray-600 line-clamp-2">{course.description}</p>
-            <p className="text-sm text-gray-500 mt-2">
-              Status: {course.status || "pending"}
-            </p>
-          </div>
+          <h4 className="font-bold text-lg mt-2">{course.name}</h4>
+          <p className="text-sm text-gray-600 line-clamp-2">{course.description}</p>
+          <p className="text-sm text-gray-500 mt-1">Status: {course.status || "pending"}</p>
+
+          <button
+            onClick={() => {
+              setSelectedCourse(course);
+              setShowAddLesson(true);
+            }}
+            className="mt-2 w-full flex items-center justify-center gap-2 px-3 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700"
+          >
+            <PlusCircle className="w-5 h-5" /> Add Lesson
+          </button>
+
+          <button
+            onClick={() => navigate(`/course/${course._id}/lessons`)}
+            className="mt-2 w-full flex items-center justify-center gap-2 px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+          >
+            View Lessons
+          </button>
         </div>
       ))}
     </div>
@@ -104,30 +169,47 @@ export default function MentorDashboard() {
   return (
     <div className="min-h-screen bg-gray-100 flex">
       {/* Sidebar */}
-      <div className="w-64 bg-white shadow-lg p-4 flex flex-col">
-        <h2 className="text-2xl font-bold mb-8 flex items-center gap-2">
-          <LayoutDashboard className="w-6 h-6 text-blue-600" />
-          Mentor Panel
-        </h2>
+      <div
+        className={`fixed inset-y-0 left-0 w-64 bg-white shadow-lg p-4 flex flex-col transform transition-transform duration-300 z-40
+        ${sidebarOpen ? "translate-x-0" : "-translate-x-full"} md:translate-x-0`}
+      >
+        <div className="flex justify-between items-center mb-8">
+          <h2 className="text-2xl font-bold flex items-center gap-2">
+            <LayoutDashboard className="w-6 h-6 text-blue-600" /> Mentor Panel
+          </h2>
+          <button className="md:hidden" onClick={() => setSidebarOpen(false)}>
+            <X className="w-6 h-6" />
+          </button>
+        </div>
+
         <ul className="space-y-3 flex-1">
-          {[{ key: "stats", label: "Dashboard", icon: Users }, { key: "courses", label: "My Courses", icon: BookOpen }].map(
-            ({ key, label, icon: Icon }) => (
-              <li key={key}>
-                <button
-                  onClick={() => setActiveTab(key)}
-                  className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition ${
-                    activeTab === key ? "bg-blue-600 text-white" : "hover:bg-gray-100 text-gray-700"
-                  }`}
-                >
-                  <Icon className="w-5 h-5" /> {label}
-                </button>
-              </li>
-            )
-          )}
-          {/* Add Course */}
+          {[
+            { key: "stats", label: "Dashboard", icon: Users },
+            { key: "courses", label: "My Courses", icon: BookOpen },
+            { key: "pending", label: "Pending Courses", icon: Clock },
+            { key: "approved", label: "Approved Courses", icon: CheckCircle },
+          ].map(({ key, label, icon: Icon }) => (
+            <li key={key}>
+              <button
+                onClick={() => {
+                  setActiveTab(key);
+                  setSidebarOpen(false); // auto-close on mobile
+                }}
+                className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition ${
+                  activeTab === key ? "bg-blue-600 text-white" : "hover:bg-gray-100 text-gray-700"
+                }`}
+              >
+                <Icon className="w-5 h-5" /> {label}
+              </button>
+            </li>
+          ))}
+
           <li>
             <button
-              onClick={() => setShowAddCourse(true)}
+              onClick={() => {
+                setShowAddCourse(true);
+                setSidebarOpen(false);
+              }}
               className="w-full flex items-center gap-3 px-3 py-2 rounded-lg transition bg-green-600 text-white hover:bg-green-700"
             >
               <PlusCircle className="w-5 h-5" /> Add Course
@@ -144,69 +226,152 @@ export default function MentorDashboard() {
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 p-6 overflow-y-auto">
-        <h2 className="text-2xl font-bold mb-6">Welcome, {mentor?.name || "Mentor"}</h2>
+      <div className="flex-1 p-6 md:ml-64">
+        {/* Topbar for mobile */}
+        <div className="md:hidden flex justify-between items-center mb-6">
+          <h2 className="text-xl font-bold text-green-700">Welcome, {mentor?.name}</h2>
+          <button className="text-gray-600" onClick={() => setSidebarOpen(true)}>
+            <Menu className="w-6 h-6" />
+          </button>
+        </div>
+
+        {/* Welcome for desktop */}
+        <h2 className="hidden md:block text-2xl font-bold mb-6 text-green-700">Welcome, {mentor?.name || "Mentor"}</h2>
 
         {/* Stats */}
         {activeTab === "stats" && (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {[{ label: "My Courses", value: stats.totalCourses, icon: BookOpen }, { label: "Pending Approvals", value: stats.pendingCourses, icon: Clock }].map(
-              ({ label, value, icon: Icon }) => (
-                <div key={label} className="bg-white shadow rounded-xl p-6 flex items-center gap-4">
-                  <Icon className="w-8 h-8 text-blue-600" />
-                  <div>
-                    <p className="text-gray-500">{label}</p>
-                    <p className="text-2xl font-bold">{value || 0}</p>
-                  </div>
-                </div>
-              )
-            )}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="bg-white shadow rounded-lg p-4">
+              <p>Total Courses</p>
+              <p className="font-bold text-2xl">{stats.totalCourses}</p>
+            </div>
+            <div className="bg-white shadow rounded-lg p-4">
+              <p>Pending Courses</p>
+              <p className="font-bold text-2xl">{stats.pendingCourses}</p>
+            </div>
+            <div className="bg-white shadow rounded-lg p-4">
+              <p>Approved Courses</p>
+              <p className="font-bold text-2xl">{stats.approvedCourses}</p>
+            </div>
           </div>
         )}
 
         {/* Courses */}
-        {activeTab === "courses" && <CourseGrid courses={courses} />}
+        {activeTab === "courses" && (
+          <div>
+            <h3 className="text-xl font-bold mb-4">My Courses</h3>
+            <CourseGrid courses={courses} />
+          </div>
+        )}
+
+        {activeTab === "pending" && (
+          <div>
+            <h3 className="text-xl font-bold mb-4">Pending Courses</h3>
+            <CourseGrid courses={courses.filter((c) => c.status === "pending")} />
+          </div>
+        )}
+
+        {activeTab === "approved" && (
+          <div>
+            <h3 className="text-xl font-bold mb-4">Approved Courses</h3>
+            <CourseGrid courses={courses.filter((c) => c.status === "approved")} />
+          </div>
+        )}
 
         {/* Add Course Modal */}
         {showAddCourse && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-2xl shadow-lg w-full max-w-lg p-6 relative">
-              <button
-                onClick={() => setShowAddCourse(false)}
-                className="absolute top-4 right-4 text-gray-500 hover:text-gray-700"
-              >
-                <X className="w-6 h-6" />
-              </button>
-              <h2 className="text-2xl font-bold mb-6 text-center text-green-600">Add New Course</h2>
-              <form onSubmit={handleAddCourse} className="space-y-4">
-                <input
-                  type="text"
-                  placeholder="Course Name"
-                  value={courseForm.name}
-                  onChange={(e) => setCourseForm({ ...courseForm, name: e.target.value })}
-                  className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-green-500"
-                  required
-                />
-                <textarea
-                  placeholder="Description"
-                  value={courseForm.description}
-                  onChange={(e) => setCourseForm({ ...courseForm, description: e.target.value })}
-                  className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-green-500"
-                  required
-                />
-                <input
-                  type="text"
-                  placeholder="Thumbnail URL"
-                  value={courseForm.thumbnail}
-                  onChange={(e) => setCourseForm({ ...courseForm, thumbnail: e.target.value })}
-                  className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-green-500"
-                />
-                <div className="flex gap-3 mt-4">
-                  <button type="submit" className="flex-1 bg-green-600 text-white py-2 rounded-lg hover:bg-green-700">Save</button>
-                  <button type="button" onClick={() => setShowAddCourse(false)} className="flex-1 bg-gray-300 text-gray-800 py-2 rounded-lg hover:bg-gray-400">Cancel</button>
-                </div>
-              </form>
-            </div>
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <form
+              onSubmit={handleAddCourse}
+              className="bg-white p-6 rounded-xl w-full max-w-md flex flex-col gap-3"
+            >
+              <h3 className="text-lg font-bold">Add Course</h3>
+              <input
+                type="text"
+                placeholder="Name"
+                value={courseForm.name}
+                onChange={(e) => setCourseForm({ ...courseForm, name: e.target.value })}
+                required
+                className="border p-2 rounded"
+              />
+              <input
+                type="text"
+                placeholder="Category"
+                value={courseForm.category}
+                onChange={(e) => setCourseForm({ ...courseForm, category: e.target.value })}
+                required
+                className="border p-2 rounded"
+              />
+              <textarea
+                placeholder="Description"
+                value={courseForm.description}
+                onChange={(e) => setCourseForm({ ...courseForm, description: e.target.value })}
+                required
+                className="border p-2 rounded"
+              />
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => setCourseForm({ ...courseForm, thumbnail: e.target.files[0] })}
+              />
+              <div className="flex justify-end gap-2 mt-2">
+                <button type="button" onClick={() => setShowAddCourse(false)} className="px-4 py-2 bg-gray-400 rounded-lg">
+                  Cancel
+                </button>
+                <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded-lg">
+                  Add
+                </button>
+              </div>
+            </form>
+          </div>
+        )}
+
+        {/* Add Lesson Modal */}
+        {showAddLesson && selectedCourse && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <form
+              onSubmit={handleAddLesson}
+              className="bg-white p-6 rounded-xl w-full max-w-md flex flex-col gap-3"
+            >
+              <h3 className="text-lg font-bold">Add Lesson to {selectedCourse.name}</h3>
+              <input
+                type="text"
+                placeholder="Lesson Title"
+                value={lessonForm.title}
+                onChange={(e) => setLessonForm({ ...lessonForm, title: e.target.value })}
+                required
+                className="border p-2 rounded"
+              />
+              <textarea
+                placeholder="Content"
+                value={lessonForm.content}
+                onChange={(e) => setLessonForm({ ...lessonForm, content: e.target.value })}
+                required
+                className="border p-2 rounded"
+              />
+              <input
+                type="file"
+                accept="video/*"
+                onChange={(e) => setLessonForm({ ...lessonForm, video: e.target.files[0] })}
+                required
+                className="border p-2 rounded"
+              />
+              <input
+                type="number"
+                placeholder="Order"
+                value={lessonForm.order}
+                onChange={(e) => setLessonForm({ ...lessonForm, order: e.target.value })}
+                className="border p-2 rounded"
+              />
+              <div className="flex justify-end gap-2 mt-2">
+                <button type="button" onClick={() => setShowAddLesson(false)} className="px-4 py-2 bg-gray-400 rounded-lg">
+                  Cancel
+                </button>
+                <button type="submit" className="px-4 py-2 bg-green-600 text-white rounded-lg">
+                  Add Lesson
+                </button>
+              </div>
+            </form>
           </div>
         )}
       </div>

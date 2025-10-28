@@ -42,8 +42,8 @@ export default function Contact() {
           </h2>
           <p className="text-gray-700">
             Studipal HQ,  
-            123 Learning Street,  
-            New Delhi, India
+            155 vpo Gill, Ludhiana
+            Punjab, India
           </p>
         </div>
 

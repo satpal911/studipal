@@ -73,7 +73,7 @@ export const UserProvider = ({ children }) => {
     setToken(null);
     localStorage.removeItem("userToken");
     localStorage.removeItem("role");
-    navigate("/user/login");
+    navigate("/", { replace: true });
   };
 
   // ✅ Auto fetch user info when token exists

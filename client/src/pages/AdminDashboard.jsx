@@ -10,7 +10,9 @@ import {
   LogOut,
   LayoutDashboard,
   X,
+  Menu,
 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 export default function AdminDashboard() {
   const { admin, token, logout } = useAdmin();
@@ -21,12 +23,15 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("stats");
   const [showAddMentor, setShowAddMentor] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false); // ✅ NEW
   const [mentorForm, setMentorForm] = useState({
     name: "",
     email: "",
     password: "",
     expertise: "",
   });
+
+    const navigate = useNavigate();
 
   useEffect(() => {
     const fetchDashboardData = async () => {
@@ -114,7 +119,7 @@ export default function AdminDashboard() {
       setShowAddMentor(false);
       const mentorsRes = await axios.get(
         "http://localhost:3000/api/v1/admin/all-mentors",
-        {withCredentials: true }
+        { withCredentials: true }
       );
       setMentors(mentorsRes.data.data || []);
     } catch (error) {
@@ -128,16 +133,32 @@ export default function AdminDashboard() {
   const CourseGrid = ({ courses }) => (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
       {courses.map((course) => (
-        <div key={course._id} className="bg-white shadow rounded-xl overflow-hidden">
+        <div
+          key={course._id}
+          className="bg-white shadow rounded-xl overflow-hidden"
+        >
           <img
-            src={course.thumbnail || course.thumbnailUrl || "/default-thumbnail.jpg"}
+            src={
+              course.thumbnail ||
+              course.thumbnailUrl ||
+              "/default-thumbnail.jpg"
+            }
             alt={course.name}
             className="w-full h-40 object-cover"
           />
           <div className="p-4">
             <h4 className="font-bold text-lg mb-1">{course.name}</h4>
-            <p className="text-sm text-gray-600 line-clamp-2">{course.description}</p>
-            <p className="text-sm text-gray-500 mt-2">Mentor: {course.mentor?.name || "N/A"}</p>
+            <p className="text-sm text-gray-600 line-clamp-2">
+              {course.description}
+            </p>
+            <p className="text-sm text-gray-500 mt-2">
+              Mentor: {course.mentor?.name || "N/A"}
+            </p>
+            <button className="flex mx-auto text-white bg-purple-600 hover:bg-purple-700 py-2 px-[130px] mt-2 rounded-lg "
+            onClick={() => navigate(`/admin/course/${course._id}/lessons`)}
+            >
+              Detail
+            </button>
             {activeTab === "pending" && (
               <div className="flex gap-3 mt-4">
                 <button
@@ -162,12 +183,24 @@ export default function AdminDashboard() {
 
   return (
     <div className="min-h-screen bg-gray-100 flex">
-      {/* Sidebar */}
-      <div className="w-64 bg-white shadow-lg p-4 flex flex-col">
-        <h2 className="text-2xl font-bold mb-8 flex items-center gap-2">
-          <LayoutDashboard className="w-6 h-6 text-blue-600" />
-          Admin Panel
-        </h2>
+      {/* Sidebar (desktop + mobile overlay) */}
+      <div
+        className={`fixed inset-y-0 left-0 w-64 bg-white shadow-lg p-4 flex flex-col transform transition-transform duration-300 z-40
+        ${sidebarOpen ? "translate-x-0" : "-translate-x-full"} md:translate-x-0`}
+      >
+        <div className="flex justify-between items-center mb-8">
+          <h2 className="text-2xl font-bold flex items-center gap-2">
+            <LayoutDashboard className="w-6 h-6 text-blue-600" />
+            Admin Panel
+          </h2>
+          <button
+            className="md:hidden text-gray-600"
+            onClick={() => setSidebarOpen(false)}
+          >
+            <X className="w-6 h-6" />
+          </button>
+        </div>
+
         <ul className="space-y-3 flex-1">
           {[
             { key: "stats", label: "Dashboard", icon: Users },
@@ -175,12 +208,13 @@ export default function AdminDashboard() {
             { key: "courses", label: "All Courses", icon: BookOpen },
             { key: "approved", label: "Approved Courses", icon: BookOpen },
             { key: "pending", label: "Pending", icon: Clock },
-          ].map(({ key, label, icon:Icon }) => (
+          ].map(({ key, label, icon: Icon }) => (
             <li key={key}>
               <button
                 onClick={() => {
                   setActiveTab(key);
                   setShowAddMentor(false);
+                  setSidebarOpen(false); // ✅ auto-close on mobile
                 }}
                 className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition ${
                   activeTab === key
@@ -192,10 +226,12 @@ export default function AdminDashboard() {
               </button>
             </li>
           ))}
-          {/* Add Mentor */}
           <li>
             <button
-              onClick={() => setShowAddMentor(true)}
+              onClick={() => {
+                setShowAddMentor(true);
+                setSidebarOpen(false);
+              }}
               className="w-full flex items-center gap-3 px-3 py-2 rounded-lg transition bg-green-600 text-white hover:bg-green-700"
             >
               <PlusCircle className="w-5 h-5" /> Add Mentor
@@ -212,19 +248,43 @@ export default function AdminDashboard() {
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 p-6 overflow-y-auto">
-        {/* Welcome */}
-        <h2 className="text-2xl font-bold mb-6">Welcome, {admin?.name || "Admin"}</h2>
+      <div className="flex-1 p-6 overflow-y-auto md:ml-64">
+        {/* Topbar for mobile */}
+        <div className="md:hidden flex justify-between items-center mb-6">
+          <h2 className="text-xl font-bold">Welcome, {admin?.name}</h2>
+          <button
+            className="text-gray-600"
+            onClick={() => setSidebarOpen(true)}
+          >
+            <Menu className="w-6 h-6" />
+          </button>
+        </div>
+
+        {/* Welcome for desktop */}
+        <h2 className="hidden md:block text-2xl font-bold mb-6">
+          Welcome, {admin?.name || "Admin"}
+        </h2>
 
         {/* Stats */}
         {activeTab === "stats" && (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {[
               { label: "Total Users", value: stats.totalUsers, icon: Users },
-              { label: "Total Mentors", value: stats.totalMentors, icon: GraduationCap },
-              { label: "Total Courses", value: stats.totalCourses, icon: BookOpen },
+              {
+                label: "Total Mentors",
+                value: stats.totalMentors,
+                icon: GraduationCap,
+              },
+              {
+                label: "Total Courses",
+                value: stats.totalCourses,
+                icon: BookOpen,
+              },
             ].map(({ label, value, icon: Icon }) => (
-              <div key={label} className="bg-white shadow rounded-xl p-6 flex items-center gap-4">
+              <div
+                key={label}
+                className="bg-white shadow rounded-xl p-6 flex items-center gap-4"
+              >
                 <Icon className="w-8 h-8 text-blue-600" />
                 <div>
                   <p className="text-gray-500">{label}</p>
@@ -241,7 +301,10 @@ export default function AdminDashboard() {
             <h3 className="text-xl font-semibold mb-4">All Mentors</h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {mentors.map((mentor) => (
-                <div key={mentor._id} className="bg-white shadow rounded-xl p-6">
+                <div
+                  key={mentor._id}
+                  className="bg-white shadow rounded-xl p-6"
+                >
                   <h4 className="font-bold text-lg">{mentor.name}</h4>
                   <p className="text-gray-600">{mentor.email}</p>
                   <p className="text-sm text-gray-500">{mentor.expertise}</p>
@@ -251,15 +314,13 @@ export default function AdminDashboard() {
           </div>
         )}
 
-        {/* All Courses */}
+        {/* Courses */}
         {activeTab === "courses" && <CourseGrid courses={allCourses} />}
-
-        {/* Approved Courses */}
         {activeTab === "approved" && (
-          <CourseGrid courses={allCourses.filter((c) => c.status === "approved")} />
+          <CourseGrid
+            courses={allCourses.filter((c) => c.status === "approved")}
+          />
         )}
-
-        {/* Pending Courses */}
         {activeTab === "pending" && <CourseGrid courses={pendingCourses} />}
 
         {/* Add Mentor Modal */}

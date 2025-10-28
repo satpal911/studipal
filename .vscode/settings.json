@@ -4,6 +4,8 @@
         "entrolled",
         "experties",
         "streamifier",
-        "studipal"
-    ]
+        "studipal",
+        "Topbar"
+    ],
+    "postman.settings.dotenv-detection-notification-visibility": false
 }

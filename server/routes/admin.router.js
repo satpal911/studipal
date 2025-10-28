@@ -2,6 +2,7 @@ const express = require("express")
 const { registerAdmin, loginAdmin, approveCourse, rejectCourse, addMentor, getAdminStats, getAllMentors, getAllCourses } = require("../controllers/admin.controller")
 const adminAuthentication = require("../middleware/auth.admin")
 const { getPendingCourses } = require("../controllers/course.controller")
+const { getCourseLessons } = require("../controllers/lesson.controller")
 
 const adminRouter = express.Router()
 
@@ -23,5 +24,6 @@ adminRouter.get("/pending-courses", adminAuthentication, getPendingCourses)
 
 adminRouter.get("/all-mentors", adminAuthentication, getAllMentors);
 adminRouter.get("/all-courses", adminAuthentication, getAllCourses);
+adminRouter.get("/course/:courseId/lessons", adminAuthentication, getCourseLessons);
 
 module.exports = adminRouter

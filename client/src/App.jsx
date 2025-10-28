@@ -1,38 +1,92 @@
-import React from 'react'
-import Navbar from './components/Navbar'
-import { Route, Routes } from 'react-router-dom'
-import Courses from './pages/Courses'
-import About from './pages/About'
-import Register from './pages/Register'
-import Login from './pages/Login'
-import MentorLogin from './pages/MentorLogin'
-import AdminLogin from './pages/AdminLogin'
-import AdminDashboard from './pages/AdminDashboard'
-import MentorDashboard from './pages/MentorDashboard'
-import Dashboard from './pages/userDashboard'
-import LandingPage from './pages/LandingPage'
-import Contact from './pages/Contact'
+import React, { useEffect, useRef } from "react";
+import { Route, Routes, useLocation, useNavigate } from "react-router-dom";
+import Navbar from "./components/Navbar";
+import Courses from "./pages/Courses";
+import About from "./pages/About";
+import Register from "./pages/Register";
+import Login from "./pages/Login";
+import MentorLogin from "./pages/MentorLogin";
+import AdminLogin from "./pages/AdminLogin";
+import AdminDashboard from "./pages/AdminDashboard";
+import MentorDashboard from "./pages/MentorDashboard";
+import Dashboard from "./pages/userDashboard";
+import LandingPage from "./pages/LandingPage";
+import Contact from "./pages/Contact";
+import CourseLessons from "./pages/CourseLesson";
 
-const App = () => {
+export default function App() {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const redirectedRef = useRef(false);
+
+  useEffect(() => {
+    // Reset redirect flag when logging out
+    if (
+      location.pathname === "/" ||
+      location.pathname.includes("/login") ||
+      location.pathname.includes("/register")
+    ) {
+      redirectedRef.current = false;
+    }
+
+    // Prevent repeated redirects
+    if (redirectedRef.current) return;
+
+    const publicPaths = [
+      "/",
+      "/user/login",
+      "/user/register",
+      "/mentor/login",
+      "/admin/login",
+      "/about",
+      "/contact",
+      "/courses",
+    ];
+
+    const isPublic = publicPaths.includes(location.pathname);
+
+    // Get tokens
+    const adminToken = localStorage.getItem("adminToken");
+    const mentorToken = localStorage.getItem("mentorToken");
+    const userToken = localStorage.getItem("userToken");
+
+    if (isPublic) {
+      if (adminToken) {
+        redirectedRef.current = true;
+        navigate("/admin/dashboard", { replace: true });
+      } else if (mentorToken) {
+        redirectedRef.current = true;
+        navigate("/mentor/dashboard", { replace: true });
+      } else if (userToken) {
+        redirectedRef.current = true;
+        navigate("/user/dashboard", { replace: true });
+      }
+    }
+  }, [location.pathname, navigate]);
+
   return (
     <div>
-      <Navbar />  
+      <Navbar />
       <Routes>
+        {/* Public Routes */}
         <Route path="/" element={<LandingPage />} />
-        <Route path="/contact" element={<Contact/>} />
+        <Route path="/contact" element={<Contact />} />
         <Route path="/courses" element={<Courses />} />
         <Route path="/about" element={<About />} />
-        <Route path="/user/register" element={<Register />} />     
+        <Route path="/user/register" element={<Register />} />
         <Route path="/user/login" element={<Login />} />
         <Route path="/mentor/login" element={<MentorLogin />} />
         <Route path="/admin/login" element={<AdminLogin />} />
-        {/* <Route path="/admin/mentor/register" element={<MentorRegister />} />     */}
+
+        {/* Dashboards */}
         <Route path="/admin/dashboard" element={<AdminDashboard />} />
         <Route path="/mentor/dashboard" element={<MentorDashboard />} />
         <Route path="/user/dashboard" element={<Dashboard />} />
+
+        {/* Lessons */}
+        <Route path="/course/:courseId/lessons" element={<CourseLessons />} />
+        {/* <Route path="/admin/course/:courseId/lessons" element={<CourseLessons />} /> */}
       </Routes>
     </div>
-  )
+  );
 }
-
-export default App

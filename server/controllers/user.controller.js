@@ -67,4 +67,67 @@ const loginUser = async (req, res) => {
   }
 };
 
-module.exports = { registerUser, loginUser };
+// ✅ Get Profile
+const getProfile = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id).select("-password");
+    if (!user) {
+      return res.status(404).json({ status: 0, message: "User not found" });
+    }
+    res.json({ status: 1, data: user });
+  } catch (err) {
+    res.status(500).json({ status: 0, message: "Server error" });
+  }
+};
+
+// ✅ Update Name
+const updateName = async (req, res) => {
+  try {
+    const { name } = req.body;
+    if (!name) {
+      return res.status(400).json({ status: 0, message: "Name is required" });
+    }
+
+    const user = await User.findByIdAndUpdate(
+      req.user.id,
+      { name },
+      { new: true }
+    ).select("-password");
+
+    res.json({ status: 1, message: "Name updated successfully", data: user });
+  } catch (err) {
+    res.status(500).json({ status: 0, message: "Server error" });
+  }
+};
+
+// ✅ Update Password
+const updatePassword = async (req, res) => {
+  try {
+    const { oldPassword, newPassword } = req.body;
+    if (!oldPassword || !newPassword) {
+      return res
+        .status(400)
+        .json({ status: 0, message: "Both old and new password are required" });
+    }
+
+    const user = await User.findById(req.user.id);
+    if (!user)
+      return res.status(404).json({ status: 0, message: "User not found" });
+
+    const isMatch = await bcrypt.compare(oldPassword, user.password);
+    if (!isMatch) {
+      return res
+        .status(400)
+        .json({ status: 0, message: "Old password is incorrect" });
+    }
+
+    user.password = await bcrypt.hash(newPassword, 10);
+    await user.save();
+
+    res.json({ status: 1, message: "Password updated successfully" });
+  } catch (err) {
+    res.status(500).json({ status: 0, message: "Server error" });
+  }
+};
+
+module.exports = { registerUser, loginUser, getProfile, updateName, updatePassword};

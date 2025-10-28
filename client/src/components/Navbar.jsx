@@ -1,36 +1,13 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Menu, X, ChevronDown, LogOut } from "lucide-react";
-import { useAdmin } from "../context/AdminContext";
+import { Menu, X, ChevronDown } from "lucide-react";
 import { useUser } from "../context/UserContext";
-import { useMentor } from "../context/MentorContext";
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [loginOpen, setLoginOpen] = useState(false);
   const location = useLocation();
-
-  // detect role
-  const role = localStorage.getItem("role");
-
-  // ✅ call hooks always at top
-  const { admin, logout: adminLogout } = useAdmin() || {};
-  const { mentor, logout: mentorLogout } = useMentor() || {};
-  const { user, logout: userLogout } = useUser() || {};
-
-  let name = null;
-  let logoutFn = null;
-
-  if (role === "admin") {
-    name = admin?.name || "Admin";
-    logoutFn = adminLogout;
-  } else if (role === "mentor") {
-    name = mentor?.name || "Mentor";
-    logoutFn = mentorLogout;
-  } else if (role === "user") {
-    name = user?.name || "User";
-    logoutFn = userLogout;
-  }
+  const { user } = useUser(); // 👈 logged-in user from context
 
   const toggleMenu = () => setIsOpen(!isOpen);
   const handleCloseMenu = () => {
@@ -46,6 +23,17 @@ export default function Navbar() {
   ];
 
   const isActive = (path) => location.pathname === path;
+
+  // 🚨 Hide Navbar only on dashboards
+  if (
+    location.pathname.startsWith("/user/dashboard") ||
+    location.pathname.startsWith("/mentor/dashboard") ||
+    location.pathname.startsWith("/admin/dashboard") ||
+    location.pathname.startsWith("/course-lessons") ||
+    location.pathname.includes("/course/") && location.pathname.includes("/lessons")
+  ) {
+    return null;
+  }
 
   return (
     <nav className="bg-white shadow-md sticky top-0 z-50">
@@ -74,8 +62,8 @@ export default function Navbar() {
               </Link>
             ))}
 
-            {/* Login or Logout */}
-            {!logoutFn ? (
+            {/* ✅ Show Login dropdown only if NOT logged in */}
+            {!user && (
               <div className="relative">
                 <button
                   onClick={() => setLoginOpen(!loginOpen)}
@@ -110,13 +98,6 @@ export default function Navbar() {
                   </div>
                 )}
               </div>
-            ) : (
-              <button
-                onClick={logoutFn}
-                className="flex items-center px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 gap-2"
-              >
-                <LogOut className="w-4 h-4" /> Logout
-              </button>
             )}
           </div>
 
@@ -151,8 +132,8 @@ export default function Navbar() {
               </Link>
             ))}
 
-            {/* Mobile Login or Logout */}
-            {!logoutFn ? (
+            {/* ✅ Show Login dropdown only if NOT logged in */}
+            {!user && (
               <div>
                 <button
                   onClick={() => setLoginOpen(!loginOpen)}
@@ -192,16 +173,6 @@ export default function Navbar() {
                   </div>
                 )}
               </div>
-            ) : (
-              <button
-                onClick={() => {
-                  logoutFn();
-                  handleCloseMenu();
-                }}
-                className="flex items-center w-full justify-center px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 gap-2"
-              >
-                <LogOut className="w-4 h-4" /> Logout
-              </button>
             )}
           </div>
         </div>
