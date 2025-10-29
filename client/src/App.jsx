@@ -85,7 +85,6 @@ export default function App() {
 
         {/* Lessons */}
         <Route path="/course/:courseId/lessons" element={<CourseLessons />} />
-        {/* <Route path="/admin/course/:courseId/lessons" element={<CourseLessons />} /> */}
       </Routes>
     </div>
   );

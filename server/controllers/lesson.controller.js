@@ -4,7 +4,7 @@ const Course = require("../models/course.model");
 const streamifier = require("streamifier");
 // const Course = require("../models/course.model");
 // const Lesson = require("../models/lesson.model");
-const cloudinary = require("../utils/cloudinary"); // adjust path
+const cloudinary = require("../utils/cloudinary"); 
 
 const addLesson = async (req, res) => {
   try {

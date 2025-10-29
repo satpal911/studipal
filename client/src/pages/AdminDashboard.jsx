@@ -31,7 +31,11 @@ export default function AdminDashboard() {
     expertise: "",
   });
 
-    const navigate = useNavigate();
+  const [selectedCourse, setSelectedCourse] = useState(null);
+  const [lessons, setLessons] = useState([]);
+  const [showLessons, setShowLessons] = useState(false);
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchDashboardData = async () => {
@@ -82,9 +86,7 @@ export default function AdminDashboard() {
         prev.filter((course) => course._id !== courseId)
       );
       setAllCourses((prev) =>
-        prev.map((c) =>
-          c._id === courseId ? { ...c, status: "approved" } : c
-        )
+        prev.map((c) => (c._id === courseId ? { ...c, status: "approved" } : c))
       );
     } catch (error) {
       console.error("Failed to approve course:", error);
@@ -154,11 +156,13 @@ export default function AdminDashboard() {
             <p className="text-sm text-gray-500 mt-2">
               Mentor: {course.mentor?.name || "N/A"}
             </p>
-            <button className="flex mx-auto text-white bg-purple-600 hover:bg-purple-700 py-2 px-[130px] mt-2 rounded-lg "
-            onClick={() => navigate(`/admin/course/${course._id}/lessons`)}
+            <button
+              className="flex mx-auto text-white bg-purple-600 hover:bg-purple-700 py-2 px-[130px] mt-2 rounded-lg"
+              onClick={() => handleViewLessons(course._id)}
             >
               Detail
             </button>
+
             {activeTab === "pending" && (
               <div className="flex gap-3 mt-4">
                 <button
@@ -181,12 +185,30 @@ export default function AdminDashboard() {
     </div>
   );
 
+  const handleViewLessons = async (courseId) => {
+    try {
+      const headers = { Authorization: `Bearer ${token}` };
+      const res = await axios.get(
+        `http://localhost:3000/api/v1/admin/course/${courseId}/lessons`,
+        { headers, withCredentials: true }
+      );
+      setLessons(res.data.data || []);
+      const course = allCourses.find((c) => c._id === courseId);
+      setSelectedCourse(course);
+      setShowLessons(true);
+    } catch (error) {
+      console.error("Failed to fetch lessons:", error);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-100 flex">
       {/* Sidebar (desktop + mobile overlay) */}
       <div
         className={`fixed inset-y-0 left-0 w-64 bg-white shadow-lg p-4 flex flex-col transform transition-transform duration-300 z-40
-        ${sidebarOpen ? "translate-x-0" : "-translate-x-full"} md:translate-x-0`}
+        ${
+          sidebarOpen ? "translate-x-0" : "-translate-x-full"
+        } md:translate-x-0`}
       >
         <div className="flex justify-between items-center mb-8">
           <h2 className="text-2xl font-bold flex items-center gap-2">
@@ -393,6 +415,49 @@ export default function AdminDashboard() {
                   </button>
                 </div>
               </form>
+            </div>
+          </div>
+        )}
+        {showLessons && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-2xl shadow-lg w-full max-w-4xl p-6 relative max-h-[85vh] overflow-y-auto">
+              <button
+                onClick={() => setShowLessons(false)}
+                className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 text-xl"
+              >
+                ✕
+              </button>
+
+              <h3 className="text-2xl font-bold mb-4 text-blue-700">
+                Lessons for: {selectedCourse?.name}
+              </h3>
+
+              {lessons.length === 0 ? (
+                <p className="text-gray-500">
+                  No lessons found for this course.
+                </p>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {lessons.map((lesson) => (
+                    <div
+                      key={lesson._id}
+                      className="bg-gray-50 border p-4 rounded-xl shadow-sm"
+                    >
+                      <h4 className="font-semibold text-lg mb-2">
+                        {lesson.title}
+                      </h4>
+                      <p className="text-sm text-gray-600 mb-3">
+                        {lesson.description}
+                      </p>
+                      {lesson.videoUrl && (
+                        <video controls className="w-full rounded-lg">
+                          <source src={lesson.videoUrl} type="video/mp4" />
+                        </video>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         )}
