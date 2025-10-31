@@ -13,7 +13,7 @@ export default function AdminLogin() {
     setError("");
 
     try {
-      await login(email, password); // ✅ use context login
+      await login(email, password);
     } catch (err) {
       setError(err || "Login failed. Try again.");
     }

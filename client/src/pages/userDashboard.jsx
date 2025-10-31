@@ -12,7 +12,7 @@ export default function UserDashboard() {
   const [lessons, setLessons] = useState([]);
   const [loading, setLoading] = useState(true);
   const [viewEnrolled, setViewEnrolled] = useState(false);
-  const [sidebarOpen, setSidebarOpen] = useState(false); // ✅ Mobile sidebar
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
     const fetchCourses = async () => {
@@ -101,7 +101,6 @@ export default function UserDashboard() {
 
   return (
     <div className="min-h-screen bg-gray-100 flex">
-      {/* Sidebar */}
       <aside
         className={`fixed inset-y-0 left-0 w-64 bg-white shadow-lg p-6 flex flex-col transform transition-transform duration-300 z-40
         ${sidebarOpen ? "translate-x-0" : "-translate-x-full"} md:translate-x-0`}
@@ -151,9 +150,7 @@ export default function UserDashboard() {
         </button>
       </aside>
 
-      {/* Main Content */}
       <main className="flex-1 p-6 md:ml-64 overflow-y-auto">
-        {/* Topbar for mobile */}
         <div className="md:hidden flex justify-between items-center mb-6">
           <h2 className="text-2xl font-bold text-blue-600">Studipal</h2>
           <button onClick={() => setSidebarOpen(true)}>

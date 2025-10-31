@@ -9,12 +9,11 @@ const userAuthentication = async (req, res, next) => {
     if (req.cookies?.token) {
       token = req.cookies.token;
     }
-    //from Authorization header (API)
+    //Authorization header (API)
     else if (req.headers.authorization?.startsWith("Bearer ")) {
       token = req.headers.authorization.split(" ")[1];
     }
 
-    //If no token found
     if (!token) {
       return res.status(401).json({
         status: 0,
@@ -41,11 +40,7 @@ const userAuthentication = async (req, res, next) => {
         message: "User not found. Please log in again.",
       });
     }
-
-    //Attach user to request
     req.user = user;
-
-    //Continue to next middleware
     next();
   } catch (error) {
     console.error("Auth Middleware Error:", error);

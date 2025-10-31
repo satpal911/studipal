@@ -12,7 +12,6 @@ const Register = () => {
 
   const { register, loading } = useUser();
 
-  // handle input changes
   const handleChange = (e) => {
     setFormData({
       ...formData,
@@ -20,7 +19,6 @@ const Register = () => {
     });
   };
 
-  // handle submit
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -52,7 +50,6 @@ const Register = () => {
             />
           </div>
 
-          {/* Email */}
           <div>
             <label className="block text-gray-700">Email</label>
             <input
@@ -66,7 +63,6 @@ const Register = () => {
             />
           </div>
 
-          {/* Password */}
           <div>
             <label className="block text-gray-700">Password</label>
             <input
@@ -80,7 +76,6 @@ const Register = () => {
             />
           </div>
 
-          {/* Submit */}
           <button
             type="submit"
             disabled={loading}

@@ -31,7 +31,6 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Features */}
       <section className="py-16 px-6 max-w-6xl mx-auto text-center">
         <h2 className="text-3xl font-bold text-gray-800 mb-10">Why Choose Studipal?</h2>
         <div className="grid md:grid-cols-3 gap-8">
@@ -58,7 +57,6 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Courses Preview */}
       <section className="py-16 px-6 bg-gray-100">
         <div className="max-w-6xl mx-auto text-center">
           <h2 className="text-3xl font-bold text-gray-800 mb-10">
@@ -97,7 +95,6 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* CTA */}
       <section className="py-16 px-6 bg-indigo-600 text-white text-center">
         <h2 className="text-3xl font-bold mb-4">
           Ready to start your learning journey?
@@ -113,7 +110,6 @@ export default function LandingPage() {
         </Link>
       </section>
 
-      {/* Footer */}
       <footer className="bg-gray-900 text-gray-400 py-6 text-center">
         <p>© {new Date().getFullYear()} Studipal. All rights reserved.</p>
         <div className="flex justify-center gap-4 mt-2">

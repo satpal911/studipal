@@ -5,16 +5,16 @@ const mentorAuthentication = async (req, res, next) => {
   try {
     let token = null;
 
-    // 1️⃣ Get token from cookies (browser)
+    //Get token from cookies (browser)
     if (req.cookies?.token) {
       token = req.cookies.token;
     }
-    // 2️⃣ Or from Authorization header (API / mobile)
+    //Authorization header (API / mobile)
     else if (req.headers.authorization?.startsWith("Bearer ")) {
       token = req.headers.authorization.split(" ")[1];
     }
 
-    // 3️⃣ No token found
+    //No token found
     if (!token) {
       return res.status(401).json({
         status: 0,
@@ -22,7 +22,7 @@ const mentorAuthentication = async (req, res, next) => {
       });
     }
 
-    // 4️⃣ Verify token
+    //Verify token
     let decoded;
     try {
       decoded = jwt.verify(token, process.env.JWT_SECRET);
@@ -33,7 +33,7 @@ const mentorAuthentication = async (req, res, next) => {
       });
     }
 
-    // 5️⃣ Find mentor by ID
+    //Find mentor by ID
     const mentor = await Mentor.findById(decoded.id).select("-password");
     if (!mentor) {
       return res.status(401).json({
@@ -42,10 +42,7 @@ const mentorAuthentication = async (req, res, next) => {
       });
     }
 
-    // 6️⃣ Attach mentor to request
     req.mentor = mentor;
-
-    // 7️⃣ Continue to next middleware
     next();
   } catch (error) {
     console.error("Mentor Auth Middleware Error:", error);

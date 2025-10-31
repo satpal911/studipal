@@ -3,7 +3,7 @@ const jwt = require("jsonwebtoken");
 const Admin = require("../models/admin.model");
 const Course = require("../models/course.model")
 const Mentor = require("../models/mentor.model")
-const User = require("../models/user.model"); // ✅ Add this line
+const User = require("../models/user.model");
 
 // REGISTER ADMIN
 const registerAdmin = async (req, res) => {
@@ -112,7 +112,7 @@ const addMentor = async (req, res) => {
 };
 
 
-// ✅ Approve a pending course
+//Approve a pending course
 const approveCourse = async (req, res) => {
   try {
     const { id } = req.params; // pending course ID
@@ -142,7 +142,7 @@ const approveCourse = async (req, res) => {
   }
 };
 
-// ❌ Reject a pending course
+//Reject a pending course
 const rejectCourse = async (req, res) => {
   try {
     const { id } = req.params;
@@ -165,7 +165,7 @@ const rejectCourse = async (req, res) => {
   }
 };
 
-// ✅ NEW: GET ADMIN STATS
+//GET ADMIN STATS
 const getAdminStats = async (req, res) => {
   try {
     const totalUsers = await User.countDocuments();

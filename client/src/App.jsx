@@ -20,7 +20,7 @@ export default function App() {
   const redirectedRef = useRef(false);
 
   useEffect(() => {
-    // Reset redirect flag when logging out
+    // Reset redirect when logout
     if (
       location.pathname === "/" ||
       location.pathname.includes("/login") ||

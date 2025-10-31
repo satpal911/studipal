@@ -7,7 +7,8 @@
         "streamifier",
         "studipal",
         "Topbar",
-        "Upskill"
+        "Upskill",
+        "VITE"
     ],
     "postman.settings.dotenv-detection-notification-visibility": false
 }

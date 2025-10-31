@@ -7,7 +7,7 @@ export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [loginOpen, setLoginOpen] = useState(false);
   const location = useLocation();
-  const { user } = useUser(); // 👈 logged-in user from context
+  const { user } = useUser(); //logged-in user from context
 
   const toggleMenu = () => setIsOpen(!isOpen);
   const handleCloseMenu = () => {
@@ -24,7 +24,7 @@ export default function Navbar() {
 
   const isActive = (path) => location.pathname === path;
 
-  // 🚨 Hide Navbar only on dashboards
+  // Hide Navbar
   if (
     location.pathname.startsWith("/user/dashboard") ||
     location.pathname.startsWith("/mentor/dashboard") ||
@@ -62,7 +62,7 @@ export default function Navbar() {
               </Link>
             ))}
 
-            {/* ✅ Show Login dropdown only if NOT logged in */}
+            {/* Show Login dropdown*/}
             {!user && (
               <div className="relative">
                 <button
@@ -132,7 +132,7 @@ export default function Navbar() {
               </Link>
             ))}
 
-            {/* ✅ Show Login dropdown only if NOT logged in */}
+            {/*Show Login dropdown*/}
             {!user && (
               <div>
                 <button

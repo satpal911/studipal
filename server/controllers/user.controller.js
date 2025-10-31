@@ -67,7 +67,7 @@ const loginUser = async (req, res) => {
   }
 };
 
-// ✅ Get Profile
+//Get Profile
 const getProfile = async (req, res) => {
   try {
     const user = await User.findById(req.user.id).select("-password");
@@ -80,7 +80,7 @@ const getProfile = async (req, res) => {
   }
 };
 
-// ✅ Update Name
+//Update Name
 const updateName = async (req, res) => {
   try {
     const { name } = req.body;
@@ -100,7 +100,7 @@ const updateName = async (req, res) => {
   }
 };
 
-// ✅ Update Password
+//Update Password
 const updatePassword = async (req, res) => {
   try {
     const { oldPassword, newPassword } = req.body;

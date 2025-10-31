@@ -10,7 +10,7 @@ export default function Courses() {
   const { user, token } = useUser();
   const navigate = useNavigate();
 
-  // Fetch all approved courses (public)
+  // Fetch all approved courses
   useEffect(() => {
     const fetchCourses = async () => {
       try {
@@ -27,7 +27,6 @@ export default function Courses() {
     fetchCourses();
   }, []);
 
-  // Enroll handler
   const handleEnroll = async (courseId) => {
     if (!user) {
       navigate("/user/login");
@@ -42,10 +41,10 @@ export default function Courses() {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-      alert("✅ Successfully enrolled!");
+      alert(" Successfully enrolled!");
     } catch (err) {
       console.error("Enroll failed:", err);
-      alert("❌ Enrollment failed. Please try again.");
+      alert(" Enrollment failed. Please try again.");
     }
   };
 

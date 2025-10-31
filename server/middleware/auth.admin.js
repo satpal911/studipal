@@ -33,7 +33,7 @@ const adminAuthentication = async (req, res, next) => {
       });
     }
 
-    //  Find admin by ID (exclude password)
+    //  Find admin by ID
     const admin = await Admin.findById(decoded.id).select("-password");
     if (!admin) {
       return res.status(401).json({
@@ -42,10 +42,7 @@ const adminAuthentication = async (req, res, next) => {
       });
     }
 
-    //  Attach admin to request
     req.admin = admin;
-
-    //  Continue to next middleware
     next();
   } catch (error) {
     console.error("Admin Auth Middleware Error:", error);

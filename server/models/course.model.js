@@ -34,7 +34,7 @@ const courseSchema = new mongoose.Schema({
         enum: ["pending", "approved", "rejected"],
         default: "pending"
     },
-    originalCourseId: { // for pending updates linked to old approved version
+    originalCourseId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Course"
     }

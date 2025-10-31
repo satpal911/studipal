@@ -51,7 +51,7 @@ export const AdminProvider = ({ children }) => {
           headers: { Authorization: `Bearer ${token}` },
           withCredentials: true,
         });
-        setAdmin(res.data.admin);
+        setAdmin(res.data);
       } catch (error) {
         console.error("Admin fetch failed:", error);
         logout();

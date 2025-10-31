@@ -10,14 +10,13 @@ export default function UserLogin() {
 
   const { login, loading, token } = useUser();
 
-  // ✅ Redirect if already logged in
+  //Redirect if already logged in
   useEffect(() => {
     if (token) {
       navigate("/user/dashboard", { replace: true });
     }
   }, [token, navigate]);
 
-  // handle input changes
   const handleChange = (e) => {
     setFormData({
       ...formData,
@@ -25,14 +24,12 @@ export default function UserLogin() {
     });
   };
 
-  // handle submit
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
     try {
-      // login function should handle token + user state
       await login(formData.email, formData.password);
-      // ✅ Replace history entry so back button won't return to login
+      //back button won't return to login
       navigate("/user/dashboard", { replace: true });
     } catch (err) {
       setError(err);
@@ -53,7 +50,6 @@ export default function UserLogin() {
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Email */}
           <div>
             <label className="block text-gray-700">Email</label>
             <input
@@ -67,7 +63,6 @@ export default function UserLogin() {
             />
           </div>
 
-          {/* Password */}
           <div>
             <label className="block text-gray-700">Password</label>
             <input
@@ -81,7 +76,6 @@ export default function UserLogin() {
             />
           </div>
 
-          {/* Submit */}
           <button
             type="submit"
             disabled={loading}
@@ -95,7 +89,6 @@ export default function UserLogin() {
           </button>
         </form>
 
-        {/* Link to Register */}
         <p className="text-center text-gray-600 mt-4">
           Don’t have an account?{" "}
           <Link

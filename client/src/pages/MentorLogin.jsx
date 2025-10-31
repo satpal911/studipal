@@ -6,13 +6,13 @@ export default function MentorLogin() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const { login, loading } = useMentor();  // ✅ use context
+  const { login, loading } = useMentor(); 
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
     try {
-      await login(email, password);  // ✅ call context login
+      await login(email, password);
     } catch (err) {
       setError(err);
     }

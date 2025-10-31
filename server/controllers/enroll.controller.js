@@ -1,19 +1,17 @@
 const User = require("../models/user.model");
 const Course = require("../models/course.model");
 
-// ✅ Enroll a student into a course
+// Enroll a student into a course
 const enrollCourse = async (req, res) => {
   try {
     const { courseId } = req.params;
     const userId = req.user.id;
 
-    // 1. Check if course exists
     const course = await Course.findById(courseId);
     if (!course) {
       return res.status(404).json({ success: false, message: "Course not found" });
     }
 
-    // 2. Allow enrollment only if approved
     if (course.status !== "approved") {
       return res.status(400).json({
         success: false,
@@ -21,13 +19,11 @@ const enrollCourse = async (req, res) => {
       });
     }
 
-    // 3. Find the student
     const user = await User.findById(userId);
     if (!user) {
       return res.status(404).json({ success: false, message: "User not found" });
     }
 
-    // 4. Check if already enrolled
     const alreadyEnrolled = user.enrolledCourses.some(
       (enrolled) => enrolled.courseId.toString() === courseId.toString()
     );
@@ -38,7 +34,6 @@ const enrollCourse = async (req, res) => {
       });
     }
 
-    // 5. Add enrollment
     user.enrolledCourses.push({
       courseId,
       status: "pending",
@@ -59,7 +54,7 @@ const enrollCourse = async (req, res) => {
   }
 };
 
-// ✅ Get enrolled courses (returns only course objects)
+//Get enrolled courses
 const getEnrolled = async (req, res) => {
   try {
     const userId = req.user.id;
@@ -75,7 +70,6 @@ const getEnrolled = async (req, res) => {
       }
     });
 
-    // extract only populated courses
     const approvedCourses = user.enrolledCourses
       .filter(c => c.courseId !== null)
       .map(c => c.courseId);

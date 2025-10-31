@@ -36,7 +36,7 @@ const userSchema = new mongoose.Schema(
       required: true,
     },
 
-    enrolledCourses: [enrolledCourseSchema],   // ✅ structured array
+    enrolledCourses: [enrolledCourseSchema],
     completedCourses: [
       { type: mongoose.Schema.Types.ObjectId, ref: "Course" }
     ],

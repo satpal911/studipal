@@ -12,6 +12,20 @@ import {
   Menu,
   X,
 } from "lucide-react";
+import {
+  Pie,
+  Cell,
+  PieChart,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+} from "recharts";
+
 import { useNavigate } from "react-router-dom";
 
 export default function MentorDashboard() {
@@ -26,7 +40,7 @@ export default function MentorDashboard() {
   const [showAddLesson, setShowAddLesson] = useState(false);
   const [selectedCourse, setSelectedCourse] = useState(null);
 
-  const [sidebarOpen, setSidebarOpen] = useState(false); // ✅ Mobile sidebar
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [courseForm, setCourseForm] = useState({
     name: "",
     description: "",
@@ -41,7 +55,7 @@ export default function MentorDashboard() {
     order: 1,
   });
 
-  // Fetch courses + stats
+  // Fetch courses and stats
   const fetchCourses = async () => {
     if (!token) return;
     try {
@@ -54,9 +68,21 @@ export default function MentorDashboard() {
       setCourses(allCourses);
 
       const totalCourses = allCourses.length;
-      const pendingCourses = allCourses.filter((c) => c.status === "pending").length;
-      const approvedCourses = allCourses.filter((c) => c.status === "approved").length;
-      setStats({ totalCourses, pendingCourses, approvedCourses });
+      const pendingCourses = allCourses.filter(
+        (c) => c.status === "pending"
+      ).length;
+      const approvedCourses = allCourses.filter(
+        (c) => c.status === "approved"
+      ).length;
+      const rejectedCourses = allCourses.filter(
+        (c) => c.status === "rejected"
+      ).length;
+      setStats({
+        totalCourses,
+        pendingCourses,
+        approvedCourses,
+        rejectedCourses,
+      });
     } catch (error) {
       console.error("Error fetching courses:", error);
     } finally {
@@ -68,7 +94,7 @@ export default function MentorDashboard() {
     fetchCourses();
   }, [token]);
 
-  // ================== ADD COURSE ==================
+  //ADD COURSE
   const handleAddCourse = async (e) => {
     e.preventDefault();
     try {
@@ -76,27 +102,37 @@ export default function MentorDashboard() {
       formData.append("name", courseForm.name);
       formData.append("description", courseForm.description);
       formData.append("category", courseForm.category);
-      if (courseForm.thumbnail) formData.append("thumbnail", courseForm.thumbnail);
+      if (courseForm.thumbnail)
+        formData.append("thumbnail", courseForm.thumbnail);
 
-      await axios.post("http://localhost:3000/api/v1/course/add-course", formData, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "multipart/form-data",
-        },
-        withCredentials: true,
+      await axios.post(
+        "http://localhost:3000/api/v1/course/add-course",
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "multipart/form-data",
+          },
+          withCredentials: true,
+        }
+      );
+
+      alert("Course added successfully!");
+      setCourseForm({
+        name: "",
+        description: "",
+        category: "",
+        thumbnail: null,
       });
-
-      alert("✅ Course added successfully!");
-      setCourseForm({ name: "", description: "", category: "", thumbnail: null });
       setShowAddCourse(false);
       fetchCourses();
     } catch (error) {
-      console.error("❌ Failed to add course:", error);
+      console.error("Failed to add course:", error);
       alert(error.response?.data?.message || "Error adding course");
     }
   };
 
-  // ================== ADD LESSON ==================
+  //ADD LESSON
   const handleAddLesson = async (e) => {
     e.preventDefault();
     if (!lessonForm.video) return alert("Please select a video file.");
@@ -119,31 +155,38 @@ export default function MentorDashboard() {
         }
       );
 
-      alert("✅ Lesson added successfully!");
+      alert("Lesson added successfully!");
       setLessonForm({ title: "", content: "", video: null, order: 1 });
       setShowAddLesson(false);
       fetchCourses();
     } catch (error) {
-      console.error("❌ Lesson error:", error.response?.data || error.message);
+      console.error("Lesson error:", error.response?.data || error.message);
       alert(error.response?.data?.message || "Error adding lesson");
     }
   };
 
   if (loading) return <p className="text-center mt-10">Loading...</p>;
 
-  // ================== COURSE GRID ==================
+  //COURSE GRID
   const CourseGrid = ({ courses }) => (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
       {courses.map((course) => (
-        <div key={course._id} className="bg-white shadow rounded-xl overflow-hidden p-4">
+        <div
+          key={course._id}
+          className="bg-white shadow rounded-xl overflow-hidden p-4"
+        >
           <img
             src={course.thumbnail || "/default-thumbnail.jpg"}
             alt={course.name}
             className="w-full h-40 object-cover rounded-lg"
           />
           <h4 className="font-bold text-lg mt-2">{course.name}</h4>
-          <p className="text-sm text-gray-600 line-clamp-2">{course.description}</p>
-          <p className="text-sm text-gray-500 mt-1">Status: {course.status || "pending"}</p>
+          <p className="text-sm text-gray-600 line-clamp-2">
+            {course.description}
+          </p>
+          <p className="text-sm text-gray-500 mt-1">
+            Status: {course.status || "pending"}
+          </p>
 
           <button
             onClick={() => {
@@ -171,7 +214,9 @@ export default function MentorDashboard() {
       {/* Sidebar */}
       <div
         className={`fixed inset-y-0 left-0 w-64 bg-white shadow-lg p-4 flex flex-col transform transition-transform duration-300 z-40
-        ${sidebarOpen ? "translate-x-0" : "-translate-x-full"} md:translate-x-0`}
+        ${
+          sidebarOpen ? "translate-x-0" : "-translate-x-full"
+        } md:translate-x-0`}
       >
         <div className="flex justify-between items-center mb-8">
           <h2 className="text-2xl font-bold flex items-center gap-2">
@@ -193,10 +238,12 @@ export default function MentorDashboard() {
               <button
                 onClick={() => {
                   setActiveTab(key);
-                  setSidebarOpen(false); // auto-close on mobile
+                  setSidebarOpen(false);
                 }}
                 className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition ${
-                  activeTab === key ? "bg-blue-600 text-white" : "hover:bg-gray-100 text-gray-700"
+                  activeTab === key
+                    ? "bg-blue-600 text-white"
+                    : "hover:bg-gray-100 text-gray-700"
                 }`}
               >
                 <Icon className="w-5 h-5" /> {label}
@@ -225,38 +272,88 @@ export default function MentorDashboard() {
         </button>
       </div>
 
-      {/* Main Content */}
       <div className="flex-1 p-6 md:ml-64">
-        {/* Topbar for mobile */}
         <div className="md:hidden flex justify-between items-center mb-6">
-          <h2 className="text-xl font-bold text-green-700">Welcome, {mentor?.name}</h2>
-          <button className="text-gray-600" onClick={() => setSidebarOpen(true)}>
+          <h2 className="text-xl font-bold text-green-700">
+            Welcome, {mentor?.name}
+          </h2>
+          <button
+            className="text-gray-600"
+            onClick={() => setSidebarOpen(true)}
+          >
             <Menu className="w-6 h-6" />
           </button>
         </div>
 
-        {/* Welcome for desktop */}
-        <h2 className="hidden md:block text-2xl font-bold mb-6 text-green-700">Welcome, {mentor?.name || "Mentor"}</h2>
+        <h2 className="hidden md:block text-2xl font-bold mb-6 text-green-700">
+          Welcome, {mentor?.name || "Mentor"}
+        </h2>
 
-        {/* Stats */}
         {activeTab === "stats" && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            <div className="bg-white shadow rounded-lg p-4">
-              <p>Total Courses</p>
-              <p className="font-bold text-2xl">{stats.totalCourses}</p>
+          <div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+              <div className="bg-white shadow rounded-lg p-5 text-center">
+                <p className="text-gray-600">Total Courses</p>
+                <p className="font-bold text-3xl text-indigo-600">
+                  {stats.totalCourses}
+                </p>
+              </div>
+              <div className="bg-white shadow rounded-lg p-5 text-center">
+                <p className="text-gray-600">Approved</p>
+                <p className="font-bold text-3xl text-green-600">
+                  {stats.approvedCourses}
+                </p>
+              </div>
+              <div className="bg-white shadow rounded-lg p-5 text-center">
+                <p className="text-gray-600">Pending</p>
+                <p className="font-bold text-3xl text-yellow-500">
+                  {stats.pendingCourses}
+                </p>
+              </div>
+              <div className="bg-white shadow rounded-lg p-5 text-center">
+                <p className="text-gray-600">Rejected</p>
+                <p className="font-bold text-3xl text-red-500">
+                  {stats.rejectedCourses}
+                </p>
+              </div>
             </div>
-            <div className="bg-white shadow rounded-lg p-4">
-              <p>Pending Courses</p>
-              <p className="font-bold text-2xl">{stats.pendingCourses}</p>
-            </div>
-            <div className="bg-white shadow rounded-lg p-4">
-              <p>Approved Courses</p>
-              <p className="font-bold text-2xl">{stats.approvedCourses}</p>
+
+            {/* Chart */}
+            <div className="bg-white shadow rounded-lg p-6">
+              <h3 className="text-lg font-semibold text-gray-800 text-center mb-4">
+                Course Status Overview
+              </h3>
+              <div className="h-96">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={[
+                        { name: "Approved", value: stats.approvedCourses || 0 },
+                        { name: "Pending", value: stats.pendingCourses || 0 },
+                        { name: "Rejected", value: stats.rejectedCourses || 0 },
+                      ]}
+                      dataKey="value"
+                      nameKey="name"
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={80}
+                      outerRadius={130}
+                      paddingAngle={4}
+                      label={({ name, value }) => `${name}: ${value}`}
+                    >
+                      <Cell fill="#22c55e" /> {/* Approved - green */}
+                      <Cell fill="#eab308" /> {/* Pending - yellow */}
+                      <Cell fill="#ef4444" /> {/* Rejected - red */}
+                    </Pie>
+                    <Tooltip />
+                    <Legend verticalAlign="bottom" height={36} />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
             </div>
           </div>
         )}
 
-        {/* Courses */}
         {activeTab === "courses" && (
           <div>
             <h3 className="text-xl font-bold mb-4">My Courses</h3>
@@ -267,14 +364,18 @@ export default function MentorDashboard() {
         {activeTab === "pending" && (
           <div>
             <h3 className="text-xl font-bold mb-4">Pending Courses</h3>
-            <CourseGrid courses={courses.filter((c) => c.status === "pending")} />
+            <CourseGrid
+              courses={courses.filter((c) => c.status === "pending")}
+            />
           </div>
         )}
 
         {activeTab === "approved" && (
           <div>
             <h3 className="text-xl font-bold mb-4">Approved Courses</h3>
-            <CourseGrid courses={courses.filter((c) => c.status === "approved")} />
+            <CourseGrid
+              courses={courses.filter((c) => c.status === "approved")}
+            />
           </div>
         )}
 
@@ -290,7 +391,9 @@ export default function MentorDashboard() {
                 type="text"
                 placeholder="Name"
                 value={courseForm.name}
-                onChange={(e) => setCourseForm({ ...courseForm, name: e.target.value })}
+                onChange={(e) =>
+                  setCourseForm({ ...courseForm, name: e.target.value })
+                }
                 required
                 className="border p-2 rounded"
               />
@@ -298,27 +401,40 @@ export default function MentorDashboard() {
                 type="text"
                 placeholder="Category"
                 value={courseForm.category}
-                onChange={(e) => setCourseForm({ ...courseForm, category: e.target.value })}
+                onChange={(e) =>
+                  setCourseForm({ ...courseForm, category: e.target.value })
+                }
                 required
                 className="border p-2 rounded"
               />
               <textarea
                 placeholder="Description"
                 value={courseForm.description}
-                onChange={(e) => setCourseForm({ ...courseForm, description: e.target.value })}
+                onChange={(e) =>
+                  setCourseForm({ ...courseForm, description: e.target.value })
+                }
                 required
                 className="border p-2 rounded"
               />
               <input
                 type="file"
                 accept="image/*"
-                onChange={(e) => setCourseForm({ ...courseForm, thumbnail: e.target.files[0] })}
+                onChange={(e) =>
+                  setCourseForm({ ...courseForm, thumbnail: e.target.files[0] })
+                }
               />
               <div className="flex justify-end gap-2 mt-2">
-                <button type="button" onClick={() => setShowAddCourse(false)} className="px-4 py-2 bg-gray-400 rounded-lg">
+                <button
+                  type="button"
+                  onClick={() => setShowAddCourse(false)}
+                  className="px-4 py-2 bg-gray-400 rounded-lg"
+                >
                   Cancel
                 </button>
-                <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded-lg">
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg"
+                >
                   Add
                 </button>
               </div>
@@ -333,26 +449,34 @@ export default function MentorDashboard() {
               onSubmit={handleAddLesson}
               className="bg-white p-6 rounded-xl w-full max-w-md flex flex-col gap-3"
             >
-              <h3 className="text-lg font-bold">Add Lesson to {selectedCourse.name}</h3>
+              <h3 className="text-lg font-bold">
+                Add Lesson to {selectedCourse.name}
+              </h3>
               <input
                 type="text"
                 placeholder="Lesson Title"
                 value={lessonForm.title}
-                onChange={(e) => setLessonForm({ ...lessonForm, title: e.target.value })}
+                onChange={(e) =>
+                  setLessonForm({ ...lessonForm, title: e.target.value })
+                }
                 required
                 className="border p-2 rounded"
               />
               <textarea
                 placeholder="Content"
                 value={lessonForm.content}
-                onChange={(e) => setLessonForm({ ...lessonForm, content: e.target.value })}
+                onChange={(e) =>
+                  setLessonForm({ ...lessonForm, content: e.target.value })
+                }
                 required
                 className="border p-2 rounded"
               />
               <input
                 type="file"
                 accept="video/*"
-                onChange={(e) => setLessonForm({ ...lessonForm, video: e.target.files[0] })}
+                onChange={(e) =>
+                  setLessonForm({ ...lessonForm, video: e.target.files[0] })
+                }
                 required
                 className="border p-2 rounded"
               />
@@ -360,14 +484,23 @@ export default function MentorDashboard() {
                 type="number"
                 placeholder="Order"
                 value={lessonForm.order}
-                onChange={(e) => setLessonForm({ ...lessonForm, order: e.target.value })}
+                onChange={(e) =>
+                  setLessonForm({ ...lessonForm, order: e.target.value })
+                }
                 className="border p-2 rounded"
               />
               <div className="flex justify-end gap-2 mt-2">
-                <button type="button" onClick={() => setShowAddLesson(false)} className="px-4 py-2 bg-gray-400 rounded-lg">
+                <button
+                  type="button"
+                  onClick={() => setShowAddLesson(false)}
+                  className="px-4 py-2 bg-gray-400 rounded-lg"
+                >
                   Cancel
                 </button>
-                <button type="submit" className="px-4 py-2 bg-green-600 text-white rounded-lg">
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-green-600 text-white rounded-lg"
+                >
                   Add Lesson
                 </button>
               </div>

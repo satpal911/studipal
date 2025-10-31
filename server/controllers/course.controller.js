@@ -126,7 +126,7 @@ const updateCourse = async (req, res) => {
       newThumbnail = result.secure_url;
     }
 
-    // Create a new pending version while keeping the old approved one active
+    // Create a new pending version
     const pendingCourse = new Course({
       name: name || existingCourse.name,
       description: description || existingCourse.description,
@@ -135,7 +135,7 @@ const updateCourse = async (req, res) => {
       mentor: existingCourse.mentor,
       lessons: lessons || existingCourse.lessons,
       status: "pending",
-      originalCourseId: existingCourse._id // to track which course it belongs to
+      originalCourseId: existingCourse._id
     });
 
     const savedPendingCourse = await pendingCourse.save();
@@ -174,10 +174,10 @@ const deleteCourse = async(req, res) => {
     }
 };
 
-//  Get all courses for mentor (all statuses)
+//  Get all courses for mentor
 const getAllCoursesMentor = async (req, res) => {
     try {
-        const allCoursesMentor = await Course.find({ mentor: req.mentor._id }).populate("mentor", "name email"); // optional: show mentor info
+        const allCoursesMentor = await Course.find({ mentor: req.mentor._id }).populate("mentor", "name email");
 ;
         res.status(200).json({
             status: 1,
@@ -192,7 +192,7 @@ const getAllCoursesMentor = async (req, res) => {
 const getPendingCourses = async (req, res) => {
   try {
     const pendingCourses = await Course.find({ status: "pending" })
-                                       .populate("mentor", "name email"); // optional: show mentor info
+                                       .populate("mentor", "name email");
 
     res.status(200).json({
       status: 1,

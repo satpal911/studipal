@@ -18,7 +18,6 @@ adminRouter.post("/add-mentor", addMentor)
 adminRouter.put("/approve-course/:id", adminAuthentication, approveCourse);
 adminRouter.put("/reject-course/:id", adminAuthentication, rejectCourse);
 
-// ✅ NEW STATS ROUTE
 adminRouter.get("/stats", adminAuthentication, getAdminStats);
 adminRouter.get("/pending-courses", adminAuthentication, getPendingCourses)
 

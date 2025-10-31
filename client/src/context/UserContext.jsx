@@ -12,7 +12,7 @@ export const UserProvider = ({ children }) => {
 
   const navigate = useNavigate();
 
-  // ✅ Register user
+  // Register user
   const register = async (name, email, password) => {
     try {
       setLoading(true);
@@ -40,7 +40,7 @@ export const UserProvider = ({ children }) => {
     }
   };
 
-  // ✅ Login user
+  // Login user
   const login = async (email, password) => {
     try {
       setLoading(true);
@@ -67,7 +67,7 @@ export const UserProvider = ({ children }) => {
     }
   };
 
-  // ✅ Logout user
+  // Logout user
   const logout = () => {
     setUser(null);
     setToken(null);
@@ -76,7 +76,7 @@ export const UserProvider = ({ children }) => {
     navigate("/", { replace: true });
   };
 
-  // ✅ Auto fetch user info when token exists
+  //Auto fetch user
   useEffect(() => {
     const fetchUser = async () => {
       if (!token) return;
@@ -86,7 +86,7 @@ export const UserProvider = ({ children }) => {
           withCredentials: true,
         });
 
-        setUser(res.data); // backend should send user object
+        setUser(res.data);
       } catch (error) {
         console.error("User fetch failed:", error);
         logout(); // clear invalid token

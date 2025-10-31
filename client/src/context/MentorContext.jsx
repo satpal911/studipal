@@ -12,7 +12,7 @@ export const MentorProvider = ({ children }) => {
 
   const navigate = useNavigate();
 
-  // ✅ Login mentor
+  // Login mentor
   const login = async (email, password) => {
     try {
       setLoading(true);
@@ -28,7 +28,7 @@ export const MentorProvider = ({ children }) => {
         localStorage.setItem("mentorToken", res.data.token);
         localStorage.setItem("role", "mentor");
 
-        // Save mentor info (if backend sends it on login)
+        // Save mentor info
         if (res.data.mentor) {
           setMentor(res.data.mentor);
         }
@@ -42,7 +42,6 @@ export const MentorProvider = ({ children }) => {
     }
   };
 
-  // ✅ Logout mentor
   const logout = () => {
     setMentor(null);
     setToken(null);
@@ -51,7 +50,7 @@ export const MentorProvider = ({ children }) => {
      navigate("/", { replace: true });
   };
 
-  // ✅ Auto fetch mentor info when token exists
+  //Auto fetch mentor
   useEffect(() => {
     const fetchMentor = async () => {
       if (!token) return;
@@ -61,7 +60,6 @@ export const MentorProvider = ({ children }) => {
           withCredentials: true,
         });
 
-        // backend returns { mentor } or mentor object
         setMentor(res.data.mentor || res.data);
       } catch (error) {
         console.error("Mentor fetch failed:", error);

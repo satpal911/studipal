@@ -31,7 +31,7 @@ lessonRouter.get("/mentor/get-all-lessons/:courseId", mentorAuthentication, getA
 lessonRouter.get("/get-all-lessons/:courseId", userAuthentication, getAllLessons);
 lessonRouter.get("z/get-all-lessons/:courseId", adminAuthentication, getAllLessons);
 
-//  Both mentor & user can see one lesson
+//mentor & user can see one lesson
 lessonRouter.get("/get-one-lesson/:lessonId", userAuthentication, getOneLesson);
 
 module.exports = lessonRouter;

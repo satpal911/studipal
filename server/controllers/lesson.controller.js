@@ -33,11 +33,11 @@ const addLesson = async (req, res) => {
       streamifier.createReadStream(req.file.buffer).pipe(stream);
     });
 
-    // Save lesson with Cloudinary video URL
+    // Save lesson with Cloudinary
     const newLesson = new Lesson({
       title,
       content,
-      videoUrl: videoUpload.secure_url, // ✅ use result from Cloudinary
+      videoUrl: videoUpload.secure_url,
       courseId: course._id
     });
 
@@ -55,8 +55,6 @@ const addLesson = async (req, res) => {
   }
 };
 
-
-// Get all lessons of a course
 const getAllLessons = async (req, res) => {
   try {
     const { courseId } = req.params;
@@ -72,7 +70,6 @@ const getAllLessons = async (req, res) => {
   }
 };
 
-// Get one lesson
 const getOneLesson = async (req, res) => {
   try {
     const { lessonId } = req.params;
@@ -92,7 +89,6 @@ const getOneLesson = async (req, res) => {
   }
 };
 
-// Update lesson
 const updateLesson = async (req, res) => {
   try {
     const { lessonId } = req.params;
@@ -118,7 +114,6 @@ const updateLesson = async (req, res) => {
   }
 };
 
-// Delete lesson
 const deleteLesson = async (req, res) => {
   try {
     const { lessonId } = req.params;
@@ -140,7 +135,7 @@ const deleteLesson = async (req, res) => {
 const getCourseLessons = async (req, res) => {
  try {
  const { courseId } = req.params;
- // Retrieve all lessons associated with the course, sorted by order
+ //lessons sorted by order
  const lessons = await Lesson.find({ courseId }).sort({ order: 1 });
 
  res.status(200).json({

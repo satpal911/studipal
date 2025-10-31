@@ -7,11 +7,12 @@ const adminRouter = require("./routes/admin.router.js")
 const lessonRouter = require("./routes/lesson.router.js")
 const connectDb = require("./database/db")
 const enrollRouter = require("./routes/enroll.router.js")
+const contactRouter = require("./routes/contact.router.js")
 require("dotenv").config();
 const cors = require("cors")
 
 const app = express()
-const port = 3000
+const port = process.env.PORT || 3000
 
 app.use(express.json());
 app.use(cookieParser());
@@ -28,6 +29,8 @@ connectDb().then(()=>{
     app.use("/api/v1/admin", adminRouter)
     app.use("/api/v1/lesson", lessonRouter)
     app.use("/api/v1/user-enroll", enrollRouter)
+    app.use("/api/v1/contact",contactRouter)
+    
     app.listen(port,()=>{
         console.log(`database running on port http://localhost:${port}`)
     })

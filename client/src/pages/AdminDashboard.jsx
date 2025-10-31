@@ -12,7 +12,19 @@ import {
   X,
   Menu,
 } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import {
+  Pie,
+  Cell,
+  PieChart,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+} from "recharts";
 
 export default function AdminDashboard() {
   const { admin, token, logout } = useAdmin();
@@ -23,7 +35,7 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("stats");
   const [showAddMentor, setShowAddMentor] = useState(false);
-  const [sidebarOpen, setSidebarOpen] = useState(false); // ✅ NEW
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [mentorForm, setMentorForm] = useState({
     name: "",
     email: "",
@@ -34,8 +46,6 @@ export default function AdminDashboard() {
   const [selectedCourse, setSelectedCourse] = useState(null);
   const [lessons, setLessons] = useState([]);
   const [showLessons, setShowLessons] = useState(false);
-
-  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchDashboardData = async () => {
@@ -201,6 +211,79 @@ export default function AdminDashboard() {
     }
   };
 
+  //chart section
+  <div className="bg-white p-6 rounded-2xl shadow-md mt-8">
+    <h3 className="text-xl font-semibold mb-4 text-center text-blue-600">
+      Platform Overview
+    </h3>
+
+    <div className="w-full h-[350px]">
+      <ResponsiveContainer width="100%" height="100%">
+        <PieChart>
+          <Pie
+            data={[
+              { name: "Users", value: stats.totalUsers || 0 },
+              { name: "Mentors", value: stats.totalMentors || 0 },
+              { name: "Courses", value: stats.totalCourses || 0 },
+            ]}
+            cx="50%"
+            cy="50%"
+            innerRadius="60%"
+            outerRadius="80%"
+            paddingAngle={5}
+            dataKey="value"
+          >
+            {["#3B82F6", "#10B981", "#F59E0B"].map((color, index) => (
+              <Cell key={`cell-${index}`} fill={color} />
+            ))}
+          </Pie>
+          <Tooltip
+            formatter={(value, name) => [`${value}`, `${name}`]}
+            contentStyle={{ borderRadius: "10px", fontSize: "14px" }}
+          />
+          <Legend verticalAlign="bottom" height={36} />
+        </PieChart>
+      </ResponsiveContainer>
+    </div>
+  </div>;
+
+  const StatsPieChart = ({ stats }) => (
+    <div className="bg-white p-6 rounded-2xl shadow-md mt-8">
+      <h3 className="text-xl font-semibold mb-4 text-center text-blue-600">
+        Platform Overview
+      </h3>
+
+      <div className="w-full h-72">
+        <ResponsiveContainer>
+          <PieChart>
+            <Pie
+              data={[
+                { name: "Users", value: stats.totalUsers || 0 },
+                { name: "Mentors", value: stats.totalMentors || 0 },
+                { name: "Courses", value: stats.totalCourses || 0 },
+              ]}
+              cx="50%"
+              cy="50%"
+              innerRadius="60%"
+              outerRadius="80%"
+              paddingAngle={5}
+              dataKey="value"
+            >
+              {["#3B82F6", "#10B981", "#F59E0B"].map((color, index) => (
+                <Cell key={`cell-${index}`} fill={color} />
+              ))}
+            </Pie>
+            <Tooltip
+              formatter={(value, name) => [`${value}`, `${name}`]}
+              contentStyle={{ borderRadius: "10px", fontSize: "14px" }}
+            />
+            <Legend verticalAlign="bottom" height={36} />
+          </PieChart>
+        </ResponsiveContainer>
+      </div>
+    </div>
+  );
+
   return (
     <div className="min-h-screen bg-gray-100 flex">
       {/* Sidebar (desktop + mobile overlay) */}
@@ -236,7 +319,7 @@ export default function AdminDashboard() {
                 onClick={() => {
                   setActiveTab(key);
                   setShowAddMentor(false);
-                  setSidebarOpen(false); // ✅ auto-close on mobile
+                  setSidebarOpen(false);
                 }}
                 className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition ${
                   activeTab === key
@@ -271,7 +354,6 @@ export default function AdminDashboard() {
 
       {/* Main Content */}
       <div className="flex-1 p-6 overflow-y-auto md:ml-64">
-        {/* Topbar for mobile */}
         <div className="md:hidden flex justify-between items-center mb-6">
           <h2 className="text-xl font-bold">Welcome, {admin?.name}</h2>
           <button
@@ -289,35 +371,27 @@ export default function AdminDashboard() {
 
         {/* Stats */}
         {activeTab === "stats" && (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {[
-              { label: "Total Users", value: stats.totalUsers, icon: Users },
-              {
-                label: "Total Mentors",
-                value: stats.totalMentors,
-                icon: GraduationCap,
-              },
-              {
-                label: "Total Courses",
-                value: stats.totalCourses,
-                icon: BookOpen,
-              },
-            ].map(({ label, value, icon: Icon }) => (
-              <div
-                key={label}
-                className="bg-white shadow rounded-xl p-6 flex items-center gap-4"
-              >
-                <Icon className="w-8 h-8 text-blue-600" />
-                <div>
-                  <p className="text-gray-500">{label}</p>
-                  <p className="text-2xl font-bold">{value || 0}</p>
+          <div className="space-y-8">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {[
+                { label: "Total Users", value: stats.totalUsers },
+                { label: "Total Mentors", value: stats.totalMentors },
+                { label: "Total Courses", value: stats.totalCourses },
+              ].map((item) => (
+                <div
+                  key={item.label}
+                  className="bg-white shadow rounded-xl p-6 text-center"
+                >
+                  <p className="text-gray-500">{item.label}</p>
+                  <p className="text-2xl font-bold">{item.value || 0}</p>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
+
+            <StatsPieChart stats={stats} />
           </div>
         )}
 
-        {/* Mentors */}
         {activeTab === "mentors" && (
           <div>
             <h3 className="text-xl font-semibold mb-4">All Mentors</h3>

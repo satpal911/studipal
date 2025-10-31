@@ -23,7 +23,7 @@ export default function CourseLessons() {
     thumbnail: null,
   });
 
-  // Fetch course + lessons
+  // Fetch course and lessons
   useEffect(() => {
     const fetchData = async () => {
       if (!courseId) return;
@@ -32,16 +32,23 @@ export default function CourseLessons() {
       try {
         const headers = mentor ? { Authorization: `Bearer ${token}` } : {};
         const [courseRes, lessonsRes] = await Promise.all([
-          axios.get(`http://localhost:3000/api/v1/course/get-one-course/${courseId}`, { headers }),
           axios.get(
-            `http://localhost:3000/api/v1/lesson/${mentor ? "mentor/get-all-lessons" : "get-all-lessons"}/${courseId}`,
+            `http://localhost:3000/api/v1/course/get-one-course/${courseId}`,
+            { headers }
+          ),
+          axios.get(
+            `http://localhost:3000/api/v1/lesson/${
+              mentor ? "mentor/get-all-lessons" : "get-all-lessons"
+            }/${courseId}`,
             { headers }
           ),
         ]);
 
         setCourse(courseRes.data.course || null);
 
-        const sortedLessons = (lessonsRes.data.data || []).sort((a, b) => a.order - b.order);
+        const sortedLessons = (lessonsRes.data.data || []).sort(
+          (a, b) => a.order - b.order
+        );
         setLessons(sortedLessons);
 
         if (sortedLessons.length > 0) setCurrentVideo(sortedLessons[0]);
@@ -65,25 +72,33 @@ export default function CourseLessons() {
       formData.append("title", lessonForm.title);
       formData.append("content", lessonForm.content);
       if (lessonForm.video) formData.append("videoUrl", lessonForm.video);
-      if (lessonForm.thumbnail) formData.append("thumbnail", lessonForm.thumbnail);
+      if (lessonForm.thumbnail)
+        formData.append("thumbnail", lessonForm.thumbnail);
 
       await axios.post(
         `http://localhost:3000/api/v1/lesson/add-lesson/${courseId}`,
         formData,
-        { headers: { Authorization: `Bearer ${token}`, "Content-Type": "multipart/form-data" } }
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "multipart/form-data",
+          },
+        }
       );
 
-      // refresh lessons
       const lessonsRes = await axios.get(
         `http://localhost:3000/api/v1/lesson/mentor/get-all-lessons/${courseId}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      const sortedLessons = (lessonsRes.data.data || []).sort((a, b) => a.order - b.order);
+      const sortedLessons = (lessonsRes.data.data || []).sort(
+        (a, b) => a.order - b.order
+      );
       setLessons(sortedLessons);
       setLessonForm({ title: "", content: "", video: null, thumbnail: null });
       setShowAddLesson(false);
-      if (!currentVideo && sortedLessons.length > 0) setCurrentVideo(sortedLessons[0]);
+      if (!currentVideo && sortedLessons.length > 0)
+        setCurrentVideo(sortedLessons[0]);
     } catch (err) {
       console.error("Failed to save lesson:", err);
       alert(err.response?.data?.message || "Error saving lesson");
@@ -95,7 +110,10 @@ export default function CourseLessons() {
 
   return (
     <div className="min-h-screen bg-gray-100 p-6">
-      <button onClick={() => navigate(-1)} className="mb-4 text-blue-600 hover:underline">
+      <button
+        onClick={() => navigate(-1)}
+        className="mb-4 text-blue-600 hover:underline"
+      >
         &larr; Back
       </button>
 
@@ -120,7 +138,11 @@ export default function CourseLessons() {
           {lessons.map((lesson, index) => (
             <div
               key={lesson._id}
-              className={`bg-white shadow rounded-xl cursor-pointer overflow-hidden ${currentVideo?._id === lesson._id ? "border-2 border-blue-600" : ""}`}
+              className={`bg-white shadow rounded-xl cursor-pointer overflow-hidden ${
+                currentVideo?._id === lesson._id
+                  ? "border-2 border-blue-600"
+                  : ""
+              }`}
               onClick={() => setCurrentVideo(lesson)}
             >
               <img
@@ -129,8 +151,12 @@ export default function CourseLessons() {
                 className="w-full h-28 object-cover"
               />
               <div className="p-3">
-                <h3 className="font-bold text-lg">{index + 1}. {lesson.title}</h3>
-                <p className="text-gray-500 text-sm line-clamp-2">{lesson.content}</p>
+                <h3 className="font-bold text-lg">
+                  {index + 1}. {lesson.title}
+                </h3>
+                <p className="text-gray-500 text-sm line-clamp-2">
+                  {lesson.content}
+                </p>
               </div>
             </div>
           ))}
@@ -152,7 +178,7 @@ export default function CourseLessons() {
         </div>
       </div>
 
-      {/* Add Lesson Modal (Mentor only) */}
+      {/* Add Lesson Modal */}
       {mentor && showAddLesson && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-2xl shadow-lg w-full max-w-lg p-6 relative">
@@ -162,41 +188,58 @@ export default function CourseLessons() {
             >
               <X className="w-6 h-6" />
             </button>
-            <h2 className="text-2xl font-bold mb-6 text-center text-green-600">Add New Lesson</h2>
+            <h2 className="text-2xl font-bold mb-6 text-center text-green-600">
+              Add New Lesson
+            </h2>
             <form onSubmit={handleAddLesson} className="space-y-4">
               <input
                 type="text"
                 placeholder="Lesson Title"
                 value={lessonForm.title}
-                onChange={(e) => setLessonForm({ ...lessonForm, title: e.target.value })}
+                onChange={(e) =>
+                  setLessonForm({ ...lessonForm, title: e.target.value })
+                }
                 className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-green-500"
                 required
               />
               <textarea
                 placeholder="Content / Description"
                 value={lessonForm.content}
-                onChange={(e) => setLessonForm({ ...lessonForm, content: e.target.value })}
+                onChange={(e) =>
+                  setLessonForm({ ...lessonForm, content: e.target.value })
+                }
                 className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-green-500"
                 required
               />
               <input
                 type="file"
                 accept="video/*"
-                onChange={(e) => setLessonForm({ ...lessonForm, video: e.target.files[0] })}
+                onChange={(e) =>
+                  setLessonForm({ ...lessonForm, video: e.target.files[0] })
+                }
                 className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-green-500"
                 required
               />
               <input
                 type="file"
                 accept="image/*"
-                onChange={(e) => setLessonForm({ ...lessonForm, thumbnail: e.target.files[0] })}
+                onChange={(e) =>
+                  setLessonForm({ ...lessonForm, thumbnail: e.target.files[0] })
+                }
                 className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-green-500"
               />
               <div className="flex gap-3 mt-4">
-                <button type="submit" className="flex-1 bg-green-600 text-white py-2 rounded-lg hover:bg-green-700">
+                <button
+                  type="submit"
+                  className="flex-1 bg-green-600 text-white py-2 rounded-lg hover:bg-green-700"
+                >
                   Save
                 </button>
-                <button type="button" onClick={() => setShowAddLesson(false)} className="flex-1 bg-gray-300 text-gray-800 py-2 rounded-lg hover:bg-gray-400">
+                <button
+                  type="button"
+                  onClick={() => setShowAddLesson(false)}
+                  className="flex-1 bg-gray-300 text-gray-800 py-2 rounded-lg hover:bg-gray-400"
+                >
                   Cancel
                 </button>
               </div>
