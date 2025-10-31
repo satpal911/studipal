@@ -13,6 +13,7 @@ import Dashboard from "./pages/userDashboard";
 import LandingPage from "./pages/LandingPage";
 import Contact from "./pages/Contact";
 import CourseLessons from "./pages/CourseLesson";
+import { Toaster } from "react-hot-toast";
 
 export default function App() {
   const navigate = useNavigate();
@@ -67,6 +68,7 @@ export default function App() {
   return (
     <div>
       <Navbar />
+      <Toaster position="top-center" />
       <Routes>
         {/* Public Routes */}
         <Route path="/" element={<LandingPage />} />

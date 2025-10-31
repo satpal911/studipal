@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { useAdmin } from "../context/AdminContext";
+import toast from "react-hot-toast"
 import {
   Users,
   GraduationCap,
@@ -98,6 +99,7 @@ export default function AdminDashboard() {
       setAllCourses((prev) =>
         prev.map((c) => (c._id === courseId ? { ...c, status: "approved" } : c))
       );
+      toast.success("course approved successfully")
     } catch (error) {
       console.error("Failed to approve course:", error);
     }
@@ -113,6 +115,7 @@ export default function AdminDashboard() {
       setPendingCourses((prev) =>
         prev.filter((course) => course._id !== courseId)
       );
+      toast.error("Course Rejected")
     } catch (error) {
       console.error("Failed to reject course:", error);
     }
@@ -126,7 +129,7 @@ export default function AdminDashboard() {
         mentorForm,
         { headers: { Authorization: `Bearer ${token}` }, withCredentials: true }
       );
-      alert("Mentor added successfully!");
+      toast.success("Mentor added successfully!");
       setMentorForm({ name: "", email: "", password: "", expertise: "" });
       setShowAddMentor(false);
       const mentorsRes = await axios.get(

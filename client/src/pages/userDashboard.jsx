@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { useUser } from "../context/UserContext";
-import { toast } from "react-hot-toast";
+import toast from "react-hot-toast";
 import { Menu, X } from "lucide-react";
 
 export default function UserDashboard() {

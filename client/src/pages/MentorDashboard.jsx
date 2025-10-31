@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { useMentor } from "../context/MentorContext";
+import toast from "react-hot-toast"
 import {
   Users,
   BookOpen,
@@ -117,7 +118,7 @@ export default function MentorDashboard() {
         }
       );
 
-      alert("Course added successfully!");
+      toast.success("Course added successfully!");
       setCourseForm({
         name: "",
         description: "",
@@ -155,7 +156,7 @@ export default function MentorDashboard() {
         }
       );
 
-      alert("Lesson added successfully!");
+      toast.success("Lesson added successfully!");
       setLessonForm({ title: "", content: "", video: null, order: 1 });
       setShowAddLesson(false);
       fetchCourses();
