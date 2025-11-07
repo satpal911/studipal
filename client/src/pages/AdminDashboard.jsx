@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { useAdmin } from "../context/AdminContext";
-import toast from "react-hot-toast"
+import toast from "react-hot-toast";
 import {
   Users,
   GraduationCap,
@@ -99,7 +99,7 @@ export default function AdminDashboard() {
       setAllCourses((prev) =>
         prev.map((c) => (c._id === courseId ? { ...c, status: "approved" } : c))
       );
-      toast.success("course approved successfully")
+      toast.success("course approved successfully");
     } catch (error) {
       console.error("Failed to approve course:", error);
     }
@@ -115,7 +115,7 @@ export default function AdminDashboard() {
       setPendingCourses((prev) =>
         prev.filter((course) => course._id !== courseId)
       );
-      toast.error("Course Rejected")
+      toast.error("Course Rejected");
     } catch (error) {
       console.error("Failed to reject course:", error);
     }
@@ -348,7 +348,10 @@ export default function AdminDashboard() {
         </ul>
 
         <button
-          onClick={logout}
+          onClick={() => {
+            logout();
+            toast.success("Logged out successfully!");
+          }}
           className="mt-6 w-full px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 flex items-center justify-center gap-2"
         >
           <LogOut className="w-5 h-5" /> Logout
@@ -420,7 +423,18 @@ export default function AdminDashboard() {
             courses={allCourses.filter((c) => c.status === "approved")}
           />
         )}
-        {activeTab === "pending" && <CourseGrid courses={pendingCourses} />}
+        {activeTab === "pending" && (
+          <div>
+            <h3 className="text-xl font-bold mb4">Pending Courses</h3>
+            {pendingCourses.length > 0 ? (
+              <CourseGrid courses={pendingCourses} />
+            ) : (
+              <p className="text-center text-gray-500 mt-10">
+                No pending courses available.
+              </p>
+            )}
+          </div>
+        )}
 
         {/* Add Mentor Modal */}
         {showAddMentor && (

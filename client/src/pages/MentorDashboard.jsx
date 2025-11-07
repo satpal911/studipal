@@ -278,7 +278,10 @@ export default function MentorDashboard() {
         </ul>
 
         <button
-          onClick={logout}
+          onClick={() => {
+            logout();
+            toast.success("Logged out successfully!");
+          }}
           className="mt-6 w-full px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 flex items-center justify-center gap-2"
         >
           <LogOut className="w-5 h-5" /> Logout
@@ -374,25 +377,48 @@ export default function MentorDashboard() {
         {activeTab === "courses" && (
           <div>
             <h3 className="text-xl font-bold mb-4">My Courses</h3>
-            <CourseGrid courses={courses} />
+            {courses.length > 0 ? (
+              <CourseGrid courses={courses} />
+            ) : (
+              <div className="flex flex-col text-gray-400 text-center text-xl mt-6 items-center">
+                <BookOpen className="w-10 h-10"/>
+              <p>
+                No courses available. Click “Add Course” to create one!
+              </p>
+              </div>
+            )}
           </div>
         )}
 
         {activeTab === "pending" && (
           <div>
             <h3 className="text-xl font-bold mb-4">Pending Courses</h3>
-            <CourseGrid
-              courses={courses.filter((c) => c.status === "pending")}
-            />
+            {courses.filter((c) => c.status === "pending").length > 0 ? (
+              <CourseGrid
+                courses={courses.filter((c) => c.status === "pending")}
+              />
+            ) : (
+              <div className="flex flex-col items-center justify-center text-gray-500 mt-10">
+                <Clock className="w-10 h-10 mb-2 text-gray-400" />
+                <p>No pending courses found.</p>
+              </div>
+            )}
           </div>
         )}
 
         {activeTab === "approved" && (
           <div>
             <h3 className="text-xl font-bold mb-4">Approved Courses</h3>
-            <CourseGrid
-              courses={courses.filter((c) => c.status === "approved")}
-            />
+            {courses.filter((c) => c.status === "approved").length > 0 ? (
+              <CourseGrid
+                courses={courses.filter((c) => c.status === "approved")}
+              />
+            ) : (
+              <div className="flex flex-col items-center justify-center text-gray-500 mt-10">
+                <CheckCircle className="w-10 h-10 mb-2 text-gray-400" />
+                <p>No approved courses found.</p>
+              </div>
+            )}
           </div>
         )}
 
@@ -461,7 +487,6 @@ export default function MentorDashboard() {
                     <>
                       <svg
                         className="animate-spin h-5 w-5 text-white"
-                        xmlns="http://www.w3.org/2000/svg"
                         fill="none"
                         viewBox="0 0 24 24"
                       >
@@ -558,7 +583,6 @@ export default function MentorDashboard() {
                     <>
                       <svg
                         className="animate-spin h-5 w-5 text-white"
-                        xmlns="http://www.w3.org/2000/svg"
                         fill="none"
                         viewBox="0 0 24 24"
                       >
