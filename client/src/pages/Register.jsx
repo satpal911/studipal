@@ -2,6 +2,7 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { useUser } from "../context/UserContext";
+import toast from "react-hot-toast"
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -23,6 +24,7 @@ const Register = () => {
     e.preventDefault();
     try {
       await register(formData.name, formData.email, formData.password);
+      toast.success("User registered successfully")
     } catch (err) {
       alert(err);
     }

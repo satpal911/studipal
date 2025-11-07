@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { useMentor } from "../context/MentorContext";
-import toast from "react-hot-toast"
+import toast from "react-hot-toast";
 import {
   Users,
   BookOpen,
@@ -12,6 +12,9 @@ import {
   CheckCircle,
   Menu,
   X,
+  CrossIcon,
+  CrosshairIcon,
+  LucideCross,
 } from "lucide-react";
 import {
   Pie,
@@ -56,6 +59,9 @@ export default function MentorDashboard() {
     order: 1,
   });
 
+  const [addingCourse, setAddingCourse] = useState(false);
+  const [addingLesson, setAddingLesson] = useState(false);
+
   // Fetch courses and stats
   const fetchCourses = async () => {
     if (!token) return;
@@ -98,6 +104,7 @@ export default function MentorDashboard() {
   //ADD COURSE
   const handleAddCourse = async (e) => {
     e.preventDefault();
+    setAddingCourse(true);
     try {
       const formData = new FormData();
       formData.append("name", courseForm.name);
@@ -130,12 +137,15 @@ export default function MentorDashboard() {
     } catch (error) {
       console.error("Failed to add course:", error);
       alert(error.response?.data?.message || "Error adding course");
+    } finally {
+      setAddingCourse(false); // stop loading
     }
   };
 
   //ADD LESSON
   const handleAddLesson = async (e) => {
     e.preventDefault();
+    setAddingLesson(true);
     if (!lessonForm.video) return alert("Please select a video file.");
 
     try {
@@ -163,6 +173,8 @@ export default function MentorDashboard() {
     } catch (error) {
       console.error("Lesson error:", error.response?.data || error.message);
       alert(error.response?.data?.message || "Error adding lesson");
+    } finally {
+      setAddingLesson(false);
     }
   };
 
@@ -294,24 +306,28 @@ export default function MentorDashboard() {
           <div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
               <div className="bg-white shadow rounded-lg p-5 text-center">
+                <BookOpen className="w-10 h-10" />
                 <p className="text-gray-600">Total Courses</p>
                 <p className="font-bold text-3xl text-indigo-600">
                   {stats.totalCourses}
                 </p>
               </div>
               <div className="bg-white shadow rounded-lg p-5 text-center">
+                <CheckCircle className="w-10 h-10" />
                 <p className="text-gray-600">Approved</p>
                 <p className="font-bold text-3xl text-green-600">
                   {stats.approvedCourses}
                 </p>
               </div>
               <div className="bg-white shadow rounded-lg p-5 text-center">
+                <Clock className="w-10 h-10" />
                 <p className="text-gray-600">Pending</p>
                 <p className="font-bold text-3xl text-yellow-500">
                   {stats.pendingCourses}
                 </p>
               </div>
               <div className="bg-white shadow rounded-lg p-5 text-center">
+                <LucideCross className="w-10 h-10" />
                 <p className="text-gray-600">Rejected</p>
                 <p className="font-bold text-3xl text-red-500">
                   {stats.rejectedCourses}
@@ -434,9 +450,40 @@ export default function MentorDashboard() {
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg"
+                  disabled={addingCourse}
+                  className={`px-4 py-2 rounded-lg text-white flex items-center justify-center gap-2 ${
+                    addingCourse
+                      ? "bg-gray-500 cursor-not-allowed"
+                      : "bg-blue-600 hover:bg-blue-700"
+                  }`}
                 >
-                  Add
+                  {addingCourse ? (
+                    <>
+                      <svg
+                        className="animate-spin h-5 w-5 text-white"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                      >
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                        ></circle>
+                        <path
+                          className="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                        ></path>
+                      </svg>
+                      Adding...
+                    </>
+                  ) : (
+                    "Add"
+                  )}
                 </button>
               </div>
             </form>
@@ -500,9 +547,40 @@ export default function MentorDashboard() {
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-green-600 text-white rounded-lg"
+                  disabled={addingLesson}
+                  className={`px-4 py-2 rounded-lg text-white flex items-center justify-center gap-2 ${
+                    addingLesson
+                      ? "bg-gray-500 cursor-not-allowed"
+                      : "bg-blue-600 hover:bg-blue-700"
+                  }`}
                 >
-                  Add Lesson
+                  {addingLesson ? (
+                    <>
+                      <svg
+                        className="animate-spin h-5 w-5 text-white"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                      >
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                        ></circle>
+                        <path
+                          className="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                        ></path>
+                      </svg>
+                      Adding...
+                    </>
+                  ) : (
+                    "Add"
+                  )}
                 </button>
               </div>
             </form>

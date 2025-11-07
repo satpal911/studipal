@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useUser } from "../context/UserContext";
+import toast from "react-hot-toast"
 
 export default function UserLogin() {
   const [formData, setFormData] = useState({ email: "", password: "" });
@@ -31,6 +32,7 @@ export default function UserLogin() {
       await login(formData.email, formData.password);
       //back button won't return to login
       navigate("/user/dashboard", { replace: true });
+      toast.success("Logged in successfully")
     } catch (err) {
       setError(err);
     }

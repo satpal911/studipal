@@ -1,6 +1,7 @@
 // src/pages/MentorLogin.jsx
 import { useState } from "react";
 import { useMentor } from "../context/MentorContext";
+import toast from "react-hot-toast"
 
 export default function MentorLogin() {
   const [email, setEmail] = useState("");
@@ -8,11 +9,13 @@ export default function MentorLogin() {
   const [error, setError] = useState("");
   const { login, loading } = useMentor(); 
 
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
     try {
       await login(email, password);
+      toast.success("Mentor Logged in successfully")
     } catch (err) {
       setError(err);
     }

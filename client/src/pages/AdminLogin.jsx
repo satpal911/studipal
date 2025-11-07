@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useAdmin } from "../context/AdminContext";
+import toast from "react-hot-toast"
 
 export default function AdminLogin() {
   const [email, setEmail] = useState("");
@@ -14,6 +15,7 @@ export default function AdminLogin() {
 
     try {
       await login(email, password);
+      toast.success("Admin logged in successfully")
     } catch (err) {
       setError(err || "Login failed. Try again.");
     }
