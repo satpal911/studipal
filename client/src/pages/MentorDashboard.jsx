@@ -308,33 +308,33 @@ export default function MentorDashboard() {
         {activeTab === "stats" && (
           <div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-              <div className="bg-white shadow rounded-lg p-5 text-center">
-                <BookOpen className="w-10 h-10" />
-                <p className="text-gray-600">Total Courses</p>
+              <div className="flex justify-center items-center gap-4 bg-white shadow rounded-lg p-5 text-center">
+                <div><BookOpen className="w-10 h-10" /></div>
+                <div><p className="text-gray-600">Total Courses</p>
                 <p className="font-bold text-3xl text-indigo-600">
                   {stats.totalCourses}
-                </p>
+                </p></div>
               </div>
-              <div className="bg-white shadow rounded-lg p-5 text-center">
-                <CheckCircle className="w-10 h-10" />
-                <p className="text-gray-600">Approved</p>
+              <div className="flex justify-center items-center gap-4 bg-white shadow rounded-lg p-5 text-center">
+                <div><CheckCircle className="w-10 h-10" /></div>
+                <div><p className="text-gray-600">Approved</p>
                 <p className="font-bold text-3xl text-green-600">
                   {stats.approvedCourses}
-                </p>
+                </p></div>
               </div>
-              <div className="bg-white shadow rounded-lg p-5 text-center">
-                <Clock className="w-10 h-10" />
-                <p className="text-gray-600">Pending</p>
+              <div className="flex justify-center items-center gap-4 bg-white shadow rounded-lg p-5 text-center">
+                <div><Clock className="w-10 h-10" /></div>
+                <div><p className="text-gray-600">Pending</p>
                 <p className="font-bold text-3xl text-yellow-500">
                   {stats.pendingCourses}
-                </p>
+                </p></div>
               </div>
-              <div className="bg-white shadow rounded-lg p-5 text-center">
-                <LucideCross className="w-10 h-10" />
-                <p className="text-gray-600">Rejected</p>
+              <div className="flex justify-center items-center gap-4 bg-white shadow rounded-lg p-5 text-center">
+                <div><LucideCross className="w-10 h-10" /></div>
+                <div><p className="text-gray-600">Rejected</p>
                 <p className="font-bold text-3xl text-red-500">
                   {stats.rejectedCourses}
-                </p>
+                </p></div>
               </div>
             </div>
 
@@ -553,7 +553,7 @@ export default function MentorDashboard() {
                 required
                 className="border p-2 rounded"
               />
-              <input
+              {/* <input
                 type="number"
                 placeholder="Order"
                 value={lessonForm.order}
@@ -561,7 +561,7 @@ export default function MentorDashboard() {
                   setLessonForm({ ...lessonForm, order: e.target.value })
                 }
                 className="border p-2 rounded"
-              />
+              /> */}
               <div className="flex justify-end gap-2 mt-2">
                 <button
                   type="button"

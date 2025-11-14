@@ -12,6 +12,7 @@ import {
   LayoutDashboard,
   X,
   Menu,
+  UserIcon,
 } from "lucide-react";
 import {
   Pie,
@@ -378,22 +379,41 @@ export default function AdminDashboard() {
         {/* Stats */}
         {activeTab === "stats" && (
           <div className="space-y-8">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {[
-                { label: "Total Users", value: stats.totalUsers },
-                { label: "Total Mentors", value: stats.totalMentors },
-                { label: "Total Courses", value: stats.totalCourses },
-              ].map((item) => (
-                <div
-                  key={item.label}
-                  className="bg-white shadow rounded-xl p-6 text-center"
-                >
-                  <p className="text-gray-500">{item.label}</p>
-                  <p className="text-2xl font-bold">{item.value || 0}</p>
-                </div>
-              ))}
+            <div className="flex justify-around">
+              <div className="flex justify-center items-center gap-4 bg-white shadow rounded-lg p-5 text-center">
+              <div>
+                <BookOpen className="w-10 h-10" />
+              </div>
+              <div>
+                <p className="text-gray-600">Total Courses</p>
+                <p className="font-bold text-3xl text-green-600">
+                  {stats.totalCourses}
+                </p>
+              </div>
             </div>
-
+            <div className="flex justify-center items-center gap-4 bg-white shadow rounded-lg p-5 text-center">
+              <div>
+                <GraduationCap className="w-10 h-10" />
+              </div>
+              <div>
+                <p className="text-gray-600">Total Mentors</p>
+                <p className="font-bold text-3xl text-gray-600">
+                  {stats.totalMentors}
+                </p>
+              </div>
+            </div>
+            <div className="flex justify-center items-center gap-4 bg-white shadow rounded-lg p-5 text-center">
+              <div>
+                <Users className="w-10 h-10" />
+              </div>
+              <div>
+                <p className="text-gray-600">Total Users</p>
+                <p className="font-bold text-3xl text-indigo-600">
+                  {stats.totalUsers}
+                </p>
+              </div>
+            </div>
+            </div>
             <StatsPieChart stats={stats} />
           </div>
         )}
@@ -407,9 +427,10 @@ export default function AdminDashboard() {
                   key={mentor._id}
                   className="bg-white shadow rounded-xl p-6"
                 >
-                  <h4 className="font-bold text-lg">{mentor.name}</h4>
-                  <p className="text-gray-600">{mentor.email}</p>
-                  <p className="text-sm text-gray-500">{mentor.expertise}</p>
+                  <UserIcon/>
+                  <h4 className="font-bold text-lg">Name: {mentor.name}</h4>
+                  <p className="text-gray-600">Email: {mentor.email}</p>
+                  <p className="text-sm text-gray-500">Expertise: {mentor.expertise}</p>
                 </div>
               ))}
             </div>
@@ -417,7 +438,7 @@ export default function AdminDashboard() {
         )}
 
         {/* Courses */}
-        {activeTab === "courses" && <CourseGrid courses={allCourses} />}
+        {activeTab === "courses" && (<CourseGrid courses={allCourses} />)}
         {activeTab === "approved" && (
           <CourseGrid
             courses={allCourses.filter((c) => c.status === "approved")}

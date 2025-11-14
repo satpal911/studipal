@@ -120,10 +120,10 @@ export default function UserDashboard() {
             setViewEnrolled(false);
             setSidebarOpen(false);
           }}
-          className={`mb-2 px-4 py-2 rounded-lg w-full text-white ${
+          className={`mb-2 px-4 py-2 rounded-lg w-full ${
             !viewEnrolled
-              ? "bg-blue-600 hover:bg-blue-700"
-              : "bg-gray-300 hover:bg-gray-400"
+              ? "bg-blue-600 hover:bg-blue-700 text-white"
+              : "bg-white-300 hover:bg-white-400 border"
           } transition`}
         >
           All Courses
@@ -133,10 +133,10 @@ export default function UserDashboard() {
             setViewEnrolled(true);
             setSidebarOpen(false);
           }}
-          className={`mb-2 px-4 py-2 rounded-lg w-full text-white ${
+          className={`mb-2 px-4 py-2 rounded-lg w-full ${
             viewEnrolled
-              ? "bg-blue-600 hover:bg-blue-700"
-              : "bg-gray-300 hover:bg-gray-400"
+              ? "bg-blue-600 hover:bg-blue-700 text-white"
+              : "bg-white-300 border"
           } transition`}
         >
           Enrolled Courses

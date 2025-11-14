@@ -72,9 +72,9 @@ const loginAdmin = async (req, res) => {
 // ADDING MENTOR
 const addMentor = async (req, res) => {
   try {
-    const { name, email, password } = req.body;
+    const { name, email, password, expertise } = req.body;
 
-    if (!name || !email || !password) {
+    if (!name || !email || !password || !expertise) {
       return res.status(403).json({
         message: "All fields are required",
       });
@@ -94,6 +94,7 @@ const addMentor = async (req, res) => {
       name,
       email,
       password: hashedPassword,
+      expertise
     });
 
     const savedMentor = await mentor.save();
@@ -195,7 +196,7 @@ const getAdminStats = async (req, res) => {
 // Get all mentors
 const getAllMentors = async (req, res) => {
   try {
-    const mentors = await Mentor.find().select("-password"); // exclude password if any
+    const mentors = await Mentor.find().select("-password"); // exclude password
     res.json({
       status: 1,
       message: "All mentors fetched successfully",

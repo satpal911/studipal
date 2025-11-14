@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useMentor } from "../context/MentorContext";
-import { PlusCircle, X } from "lucide-react";
+import { PlusCircle, SaladIcon, X } from "lucide-react";
 
 export default function CourseLessons() {
   const { courseId } = useParams();
@@ -163,7 +163,7 @@ export default function CourseLessons() {
         </div>
 
         {/* Video Player */}
-        <div className="lg:w-2/3 bg-black rounded-xl shadow overflow-hidden">
+        <div className=" rounded-xl text-xl text-gray-400 overflow-hidden">
           {currentVideo ? (
             <video
               key={currentVideo._id}
@@ -173,7 +173,7 @@ export default function CourseLessons() {
               className="w-full h-80 lg:h-[500px] object-cover"
             />
           ) : (
-            <p className="text-white p-6">Select a lesson to play</p>
+            <p className="text-center p-6">No lessons available</p>
           )}
         </div>
       </div>
