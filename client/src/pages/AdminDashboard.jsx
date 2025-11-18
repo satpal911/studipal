@@ -13,6 +13,8 @@ import {
   X,
   Menu,
   UserIcon,
+  CroissantIcon,
+  CrossIcon,
 } from "lucide-react";
 import {
   Pie,
@@ -421,7 +423,8 @@ export default function AdminDashboard() {
         {activeTab === "mentors" && (
           <div>
             <h3 className="text-xl font-semibold mb-4">All Mentors</h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {mentors.length>0?(
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {mentors.map((mentor) => (
                 <div
                   key={mentor._id}
@@ -434,6 +437,13 @@ export default function AdminDashboard() {
                 </div>
               ))}
             </div>
+            ):(
+              <div>
+                
+                <p className="text-gray-600 text-xl text-center">no mentors available</p>
+                <p className="text-xl text-gray-600 text-center ">go to "ADD MENTOR" tab to add mentors</p>
+              </div>
+            )}
           </div>
         )}
 
