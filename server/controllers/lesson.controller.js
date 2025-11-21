@@ -23,6 +23,9 @@ const addLesson = async (req, res) => {
           resource_type: "video",
           folder: "lesson_video",
           public_id: `video${course._id}_${Date.now()}`,
+           eager: [
+            { width: 320, height: 180, crop: "fill", format: "jpg" } // generates thumbnail
+          ],
         },
         (error, result) => {
           if (error) reject(error);
@@ -38,6 +41,7 @@ const addLesson = async (req, res) => {
       title,
       content,
       videoUrl: videoUpload.secure_url,
+      thumbnail: videoUpload.eager[0].secure_url,
       courseId: course._id
     });
 

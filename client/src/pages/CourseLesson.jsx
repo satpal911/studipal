@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useMentor } from "../context/MentorContext";
-import { PlusCircle, SaladIcon, X } from "lucide-react";
+import { X } from "lucide-react";
 
 export default function CourseLessons() {
   const { courseId } = useParams();
@@ -23,28 +23,38 @@ export default function CourseLessons() {
     thumbnail: null,
   });
 
+  // Helper to get full image URL or fallback
+ const getFullImageUrl = (path, fallback) => {
+  if (!path || path.trim() === "") return fallback; // fallback if empty
+  // if backend already returns full URL
+  if (path.startsWith("http") || path.startsWith("https")) return path;
+  // else prepend server URL
+  return `http://localhost:3000/${path}`;
+};
+
+
   // Fetch course and lessons
   useEffect(() => {
     const fetchData = async () => {
-      if (!courseId) return;
+      if (!courseId || !token) return;
       setLoading(true);
       setError("");
       try {
-        const headers = mentor ? { Authorization: `Bearer ${token}` } : {};
+        const headers = { Authorization: `Bearer ${token}` };
+
         const [courseRes, lessonsRes] = await Promise.all([
           axios.get(
             `http://localhost:3000/api/v1/course/get-one-course/${courseId}`,
-            { headers }
+            { headers, withCredentials: true }
           ),
           axios.get(
-            `http://localhost:3000/api/v1/lesson/${
-              mentor ? "mentor/get-all-lessons" : "get-all-lessons"
-            }/${courseId}`,
-            { headers }
+            `http://localhost:3000/api/v1/lesson/mentor/get-all-lessons/${courseId}`,
+            { headers, withCredentials: true }
           ),
         ]);
 
-        setCourse(courseRes.data.course || null);
+        const courseData = courseRes.data.data;
+        setCourse(courseData || null);
 
         const sortedLessons = (lessonsRes.data.data || []).sort(
           (a, b) => a.order - b.order
@@ -54,14 +64,16 @@ export default function CourseLessons() {
         if (sortedLessons.length > 0) setCurrentVideo(sortedLessons[0]);
       } catch (err) {
         console.error("Error fetching course or lessons:", err);
-        setError("Failed to load course or lessons.");
+        setError(
+          err.response?.data?.message || "Failed to load course or lessons."
+        );
       } finally {
         setLoading(false);
       }
     };
 
     fetchData();
-  }, [courseId, mentor, token]);
+  }, [courseId, token]);
 
   const handleAddLesson = async (e) => {
     e.preventDefault();
@@ -71,9 +83,8 @@ export default function CourseLessons() {
       const formData = new FormData();
       formData.append("title", lessonForm.title);
       formData.append("content", lessonForm.content);
-      if (lessonForm.video) formData.append("videoUrl", lessonForm.video);
-      if (lessonForm.thumbnail)
-        formData.append("thumbnail", lessonForm.thumbnail);
+      formData.append("videoUrl", lessonForm.video);
+      if (lessonForm.thumbnail) formData.append("thumbnail", lessonForm.thumbnail);
 
       await axios.post(
         `http://localhost:3000/api/v1/lesson/add-lesson/${courseId}`,
@@ -86,9 +97,13 @@ export default function CourseLessons() {
         }
       );
 
+      // Refresh lessons
       const lessonsRes = await axios.get(
         `http://localhost:3000/api/v1/lesson/mentor/get-all-lessons/${courseId}`,
-        { headers: { Authorization: `Bearer ${token}` } }
+        {
+          headers: { Authorization: `Bearer ${token}` },
+          withCredentials: true,
+        }
       );
 
       const sortedLessons = (lessonsRes.data.data || []).sort(
@@ -121,7 +136,7 @@ export default function CourseLessons() {
       {course && (
         <div className="bg-gray-800 text-white rounded-xl overflow-hidden mb-6 relative">
           <img
-            src={course.thumbnail || "/default-thumbnail.jpg"}
+            src={getFullImageUrl(course.thumbnail, "https://via.placeholder.com/600x200")}
             alt={course.name}
             className="w-full h-60 object-cover opacity-80"
           />
@@ -139,14 +154,15 @@ export default function CourseLessons() {
             <div
               key={lesson._id}
               className={`bg-white shadow rounded-xl cursor-pointer overflow-hidden ${
-                currentVideo?._id === lesson._id
-                  ? "border-2 border-blue-600"
-                  : ""
+                currentVideo?._id === lesson._id ? "border-2 border-blue-600" : ""
               }`}
               onClick={() => setCurrentVideo(lesson)}
             >
               <img
-                src={lesson.thumbnail || "/default-video-thumbnail.jpg"}
+                src={getFullImageUrl(
+                  lesson.thumbnail,
+                  "/default-video-thumbnail.jpg"
+                )}
                 alt={lesson.title}
                 className="w-full h-28 object-cover"
               />
@@ -163,7 +179,7 @@ export default function CourseLessons() {
         </div>
 
         {/* Video Player */}
-        <div className=" rounded-xl text-xl text-gray-400 overflow-hidden">
+        <div className="rounded-xl text-xl text-gray-400 overflow-hidden flex-1">
           {currentVideo ? (
             <video
               key={currentVideo._id}

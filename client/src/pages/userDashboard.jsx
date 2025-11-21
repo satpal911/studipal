@@ -175,7 +175,7 @@ export default function UserDashboard() {
               <p className="text-gray-500 text-center">No courses to display.</p>
             )}
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-6">
               {coursesToDisplay
                 .filter((course) => course && course._id)
                 .map((course) => {
@@ -203,7 +203,7 @@ export default function UserDashboard() {
                       </div>
 
                       <div className="p-4">
-                        <p className="text-gray-600 text-sm mb-3 line-clamp-3">
+                        <p className="text-gray-600 text-sm mb-3 line-clamp-1">
                           {course.description || "No description available."}
                         </p>
                         <p className="text-sm text-gray-500 mb-3">
