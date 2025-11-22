@@ -13,6 +13,8 @@ import {
   Menu,
   X,
   LucideCross,
+  Edit,
+  Trash2,
 } from "lucide-react";
 import {
   Pie,
@@ -106,19 +108,35 @@ export default function MentorDashboard() {
       if (courseForm.thumbnail)
         formData.append("thumbnail", courseForm.thumbnail);
 
-      await axios.post(
-        "http://localhost:3000/api/v1/course/add-course",
-        formData,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "multipart/form-data",
-          },
-          withCredentials: true,
-        }
-      );
+      if (selectedCourse) {
+        // 🟢 Update existing course
+        await axios.put(
+          `http://localhost:3000/api/v1/course/update-course/${selectedCourse._id}`,
+          formData,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "multipart/form-data",
+            },
+          }
+        );
+        toast.success("Course updated successfully!");
+      } else {
+        // 🟢 Add new course
+        await axios.post(
+          "http://localhost:3000/api/v1/course/add-course",
+          formData,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "multipart/form-data",
+            },
+            withCredentials: true,
+          }
+        );
+        toast.success("Course added successfully!");
+      }
 
-      toast.success("Course added successfully!");
       setCourseForm({
         name: "",
         description: "",
@@ -126,12 +144,41 @@ export default function MentorDashboard() {
         thumbnail: null,
       });
       setShowAddCourse(false);
+      setSelectedCourse(null);
       fetchCourses();
     } catch (error) {
-      console.error("Failed to add course:", error);
-      alert(error.response?.data?.message || "Error adding course");
+      console.error("Failed to save course:", error);
+      alert(error.response?.data?.message || "Error saving course");
     } finally {
-      setAddingCourse(false); // stop loading
+      setAddingCourse(false);
+    }
+  };
+
+  // ✏️ Edit Course
+  const handleEditCourse = (course) => {
+    setSelectedCourse(course);
+    setCourseForm({
+      name: course.name,
+      description: course.description,
+      category: course.category,
+      thumbnail: null,
+    });
+    setShowAddCourse(true);
+  };
+
+  // 🗑️ Delete Course
+  const handleDeleteCourse = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this course?")) return;
+    try {
+      await axios.delete(
+        `http://localhost:3000/api/v1/course/delete-course/${id}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      toast.success("Course deleted successfully!");
+      fetchCourses();
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to delete course");
     }
   };
 
@@ -193,6 +240,24 @@ export default function MentorDashboard() {
           <p className="text-sm text-gray-500 mt-1">
             Status: {course.status || "pending"}
           </p>
+
+          <div className="flex justify-end gap-3 mt-3">
+            <button
+              onClick={() => handleEditCourse(course)}
+              className="text-blue-600 hover:text-blue-800"
+              title="Edit"
+            >
+              <Edit className="w-5 h-5" />
+            </button>
+
+            <button
+              onClick={() => handleDeleteCourse(course._id)}
+              className="text-red-600 hover:text-red-800"
+              title="Delete"
+            >
+              <Trash2 className="w-5 h-5" />
+            </button>
+          </div>
 
           <button
             onClick={() => {
@@ -302,32 +367,48 @@ export default function MentorDashboard() {
           <div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
               <div className="flex justify-center items-center gap-4 bg-white shadow rounded-lg p-5 text-center">
-                <div><BookOpen className="w-10 h-10" /></div>
-                <div><p className="text-gray-600">Total Courses</p>
-                <p className="font-bold text-3xl text-indigo-600">
-                  {stats.totalCourses}
-                </p></div>
+                <div>
+                  <BookOpen className="w-10 h-10" />
+                </div>
+                <div>
+                  <p className="text-gray-600">Total Courses</p>
+                  <p className="font-bold text-3xl text-indigo-600">
+                    {stats.totalCourses}
+                  </p>
+                </div>
               </div>
               <div className="flex justify-center items-center gap-4 bg-white shadow rounded-lg p-5 text-center">
-                <div><CheckCircle className="w-10 h-10" /></div>
-                <div><p className="text-gray-600">Approved</p>
-                <p className="font-bold text-3xl text-green-600">
-                  {stats.approvedCourses}
-                </p></div>
+                <div>
+                  <CheckCircle className="w-10 h-10" />
+                </div>
+                <div>
+                  <p className="text-gray-600">Approved</p>
+                  <p className="font-bold text-3xl text-green-600">
+                    {stats.approvedCourses}
+                  </p>
+                </div>
               </div>
               <div className="flex justify-center items-center gap-4 bg-white shadow rounded-lg p-5 text-center">
-                <div><Clock className="w-10 h-10" /></div>
-                <div><p className="text-gray-600">Pending</p>
-                <p className="font-bold text-3xl text-yellow-500">
-                  {stats.pendingCourses}
-                </p></div>
+                <div>
+                  <Clock className="w-10 h-10" />
+                </div>
+                <div>
+                  <p className="text-gray-600">Pending</p>
+                  <p className="font-bold text-3xl text-yellow-500">
+                    {stats.pendingCourses}
+                  </p>
+                </div>
               </div>
               <div className="flex justify-center items-center gap-4 bg-white shadow rounded-lg p-5 text-center">
-                <div><LucideCross className="w-10 h-10" /></div>
-                <div><p className="text-gray-600">Rejected</p>
-                <p className="font-bold text-3xl text-red-500">
-                  {stats.rejectedCourses}
-                </p></div>
+                <div>
+                  <LucideCross className="w-10 h-10" />
+                </div>
+                <div>
+                  <p className="text-gray-600">Rejected</p>
+                  <p className="font-bold text-3xl text-red-500">
+                    {stats.rejectedCourses}
+                  </p>
+                </div>
               </div>
             </div>
 
@@ -374,10 +455,8 @@ export default function MentorDashboard() {
               <CourseGrid courses={courses} />
             ) : (
               <div className="flex flex-col text-gray-400 text-center text-xl mt-6 items-center">
-                <BookOpen className="w-10 h-10"/>
-              <p>
-                No courses available. Click “Add Course” to create one!
-              </p>
+                <BookOpen className="w-10 h-10" />
+                <p>No courses available. Click “Add Course” to create one!</p>
               </div>
             )}
           </div>
@@ -422,7 +501,10 @@ export default function MentorDashboard() {
               onSubmit={handleAddCourse}
               className="bg-white p-6 rounded-xl w-full max-w-md flex flex-col gap-3"
             >
-              <h3 className="text-lg font-bold">Add Course</h3>
+              <h3 className="text-lg font-bold">
+                {selectedCourse ? "Edit Course" : "Add Course"}
+              </h3>
+
               <input
                 type="text"
                 placeholder="Name"
@@ -497,8 +579,10 @@ export default function MentorDashboard() {
                           d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
                         ></path>
                       </svg>
-                      Adding...
+                      Saving...
                     </>
+                  ) : selectedCourse ? (
+                    "Update"
                   ) : (
                     "Add"
                   )}
@@ -546,7 +630,7 @@ export default function MentorDashboard() {
                 required
                 className="border p-2 rounded"
               />
-              
+
               <div className="flex justify-end gap-2 mt-2">
                 <button
                   type="button"

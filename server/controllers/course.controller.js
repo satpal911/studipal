@@ -95,64 +95,70 @@ const getOneCourse = async(req, res) => {
 const updateCourse = async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, description, category, thumbnail, lessons } = req.body;
+    const { name, description, category } = req.body;
 
-    // Find existing course
-    const existingCourse = await Course.findById({_id:id});
-
-    if (!existingCourse) {
-      return res.status(404).json({
-        status: 0,
-        message: "Course not found"
-      });
+    // Find the existing course
+    const course = await Course.findById(id);
+    if (!course) {
+      return res.status(404).json({ status: 0, message: "Course not found" });
     }
 
     // Ensure only the mentor who owns the course can update
-    if (existingCourse.mentor.toString() !== req.mentor._id.toString()) {
+    if (course.mentor.toString() !== req.mentor._id.toString()) {
       return res.status(403).json({
         status: 0,
-        message: "You are not authorized to update this course"
+        message: "You are not authorized to update this course",
       });
     }
 
-        let newThumbnail = existingCourse.thumbnail;
+    // Prepare update object
+    const updateData = {
+      name: name || course.name,
+      description: description || course.description,
+      category: category || course.category,
+    };
 
-          // If new thumbnail uploaded
+    // ✅ Handle thumbnail replacement
     if (req.file) {
+      // Delete old Cloudinary thumbnail if exists
+      if (course.thumbnail) {
+        try {
+          const publicId = course.thumbnail
+            .split("/")
+            .slice(-1)[0]
+            .split(".")[0];
+          await cloudinary.uploader.destroy(`studipal/courses/${publicId}`);
+        } catch (err) {
+          console.warn("Old thumbnail deletion failed:", err.message);
+        }
+      }
+
+      // Upload new one
       const result = await cloudinary.uploader.upload(req.file.path, {
         folder: "studipal/courses",
       });
       fs.unlinkSync(req.file.path);
-      newThumbnail = result.secure_url;
+      updateData.thumbnail = result.secure_url;
     }
 
-    // Create a new pending version
-    const pendingCourse = new Course({
-      name: name || existingCourse.name,
-      description: description || existingCourse.description,
-      category: category || existingCourse.category,
-      thumbnail: newThumbnail || existingCourse.thumbnail,
-      mentor: existingCourse.mentor,
-      lessons: lessons || existingCourse.lessons,
-      status: "pending",
-      originalCourseId: existingCourse._id
+    // ✅ Update the existing course directly
+    const updatedCourse = await Course.findByIdAndUpdate(id, updateData, {
+      new: true,
     });
-
-    const savedPendingCourse = await pendingCourse.save();
 
     res.status(200).json({
       status: 1,
-      message: "Course update submitted for approval. Existing course remains live.",
-      data: savedPendingCourse
+      message: "Course updated successfully",
+      data: updatedCourse,
     });
-
   } catch (error) {
-    res.status(500).json({
-      status: 0,
-      message: `Server error ${error.message}`
-    });
+    console.error("Error updating course:", error);
+    res
+      .status(500)
+      .json({ status: 0, message: `Server error: ${error.message}` });
   }
 };
+
 
 
 const deleteCourse = async(req, res) => {

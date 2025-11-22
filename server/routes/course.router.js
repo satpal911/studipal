@@ -10,7 +10,7 @@ courseRouter.post("/add-course",mentorAuthentication,upload.single("thumbnail"),
 courseRouter.get("/get-all-courses",getAllCourses) 
 courseRouter.get("/mentor/get-all-courses", mentorAuthentication,getAllCoursesMentor)
 courseRouter.get("/get-one-course/:id", mentorAuthentication,getOneCourse)
-courseRouter.put("/update-course/:id", mentorAuthentication,updateCourse)
+courseRouter.put("/update-course/:id", mentorAuthentication,upload.single("thumbnail"),updateCourse)
 courseRouter.delete("/delete-course/:id", mentorAuthentication,deleteCourse)
 
 module.exports = courseRouter

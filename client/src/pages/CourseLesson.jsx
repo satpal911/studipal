@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useMentor } from "../context/MentorContext";
-import { X } from "lucide-react";
+import { X, Edit, Trash2 } from "lucide-react"; // ✅ added icons
 
 export default function CourseLessons() {
   const { courseId } = useParams();
@@ -23,15 +23,16 @@ export default function CourseLessons() {
     thumbnail: null,
   });
 
-  // Helper to get full image URL or fallback
- const getFullImageUrl = (path, fallback) => {
-  if (!path || path.trim() === "") return fallback; // fallback if empty
-  // if backend already returns full URL
-  if (path.startsWith("http") || path.startsWith("https")) return path;
-  // else prepend server URL
-  return `http://localhost:3000/${path}`;
-};
+  // ✅ added for edit functionality
+  const [selectedLesson, setSelectedLesson] = useState(null);
+  const [isEditing, setIsEditing] = useState(false);
 
+  // Helper to get full image URL or fallback
+  const getFullImageUrl = (path, fallback) => {
+    if (!path || path.trim() === "") return fallback; // fallback if empty
+    if (path.startsWith("http") || path.startsWith("https")) return path;
+    return `http://localhost:3000/${path}`;
+  };
 
   // Fetch course and lessons
   useEffect(() => {
@@ -75,27 +76,45 @@ export default function CourseLessons() {
     fetchData();
   }, [courseId, token]);
 
+  // ✅ unified Add / Edit handler
   const handleAddLesson = async (e) => {
     e.preventDefault();
-    if (!lessonForm.video) return alert("Please select a video file.");
+    if (!lessonForm.title || !lessonForm.content)
+      return alert("Please fill all fields");
 
     try {
       const formData = new FormData();
       formData.append("title", lessonForm.title);
       formData.append("content", lessonForm.content);
-      formData.append("videoUrl", lessonForm.video);
-      if (lessonForm.thumbnail) formData.append("thumbnail", lessonForm.thumbnail);
+      if (lessonForm.video) formData.append("videoUrl", lessonForm.video);
+      if (lessonForm.thumbnail)
+        formData.append("thumbnail", lessonForm.thumbnail);
 
-      await axios.post(
-        `http://localhost:3000/api/v1/lesson/add-lesson/${courseId}`,
-        formData,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
+      if (isEditing && selectedLesson) {
+        // ✏️ update existing lesson
+        await axios.put(
+          `http://localhost:3000/api/v1/lesson/update-lesson/${selectedLesson._id}`,
+          formData,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "multipart/form-data",
+            },
+          }
+        );
+      } else {
+        // ➕ add new lesson
+        await axios.post(
+          `http://localhost:3000/api/v1/lesson/add-lesson/${courseId}`,
+          formData,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "multipart/form-data",
+            },
+          }
+        );
+      }
 
       // Refresh lessons
       const lessonsRes = await axios.get(
@@ -111,12 +130,56 @@ export default function CourseLessons() {
       );
       setLessons(sortedLessons);
       setLessonForm({ title: "", content: "", video: null, thumbnail: null });
+      setSelectedLesson(null);
+      setIsEditing(false);
       setShowAddLesson(false);
       if (!currentVideo && sortedLessons.length > 0)
         setCurrentVideo(sortedLessons[0]);
     } catch (err) {
       console.error("Failed to save lesson:", err);
       alert(err.response?.data?.message || "Error saving lesson");
+    }
+  };
+
+  // ✏️ Edit Lesson (✅ added)
+  const handleEditLesson = (lesson) => {
+    setSelectedLesson(lesson);
+    setLessonForm({
+      title: lesson.title,
+      content: lesson.content,
+      video: null,
+      thumbnail: null,
+    });
+    setIsEditing(true);
+    setShowAddLesson(true);
+  };
+
+  // 🗑 Delete Lesson (✅ added)
+  const handleDeleteLesson = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this lesson?")) return;
+
+    try {
+      await axios.delete(
+        `http://localhost:3000/api/v1/lesson/delete-lesson/${id}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      // Refresh lessons
+      const lessonsRes = await axios.get(
+        `http://localhost:3000/api/v1/lesson/mentor/get-all-lessons/${courseId}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+          withCredentials: true,
+        }
+      );
+
+      const sortedLessons = (lessonsRes.data.data || []).sort(
+        (a, b) => a.order - b.order
+      );
+      setLessons(sortedLessons);
+    } catch (error) {
+      console.error(error);
+      alert("Failed to delete lesson");
     }
   };
 
@@ -136,7 +199,10 @@ export default function CourseLessons() {
       {course && (
         <div className="bg-gray-800 text-white rounded-xl overflow-hidden mb-6 relative">
           <img
-            src={getFullImageUrl(course.thumbnail, "https://via.placeholder.com/600x200")}
+            src={getFullImageUrl(
+              course.thumbnail,
+              "https://via.placeholder.com/600x200"
+            )}
             alt={course.name}
             className="w-full h-60 object-cover opacity-80"
           />
@@ -153,8 +219,10 @@ export default function CourseLessons() {
           {lessons.map((lesson, index) => (
             <div
               key={lesson._id}
-              className={`bg-white shadow rounded-xl cursor-pointer overflow-hidden ${
-                currentVideo?._id === lesson._id ? "border-2 border-blue-600" : ""
+              className={`bg-white shadow rounded-xl overflow-hidden ${
+                currentVideo?._id === lesson._id
+                  ? "border-2 border-blue-600"
+                  : ""
               }`}
               onClick={() => setCurrentVideo(lesson)}
             >
@@ -173,6 +241,28 @@ export default function CourseLessons() {
                 <p className="text-gray-500 text-sm line-clamp-2">
                   {lesson.content}
                 </p>
+
+                {/* ✅ Edit / Delete Buttons */}
+                <div className="flex justify-end gap-3 mt-3">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleEditLesson(lesson);
+                    }}
+                    className="text-blue-600 hover:text-blue-800"
+                  >
+                    <Edit className="w-5 h-5" />
+                  </button>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDeleteLesson(lesson._id);
+                    }}
+                    className="text-red-600 hover:text-red-800"
+                  >
+                    <Trash2 className="w-5 h-5" />
+                  </button>
+                </div>
               </div>
             </div>
           ))}
@@ -194,18 +284,28 @@ export default function CourseLessons() {
         </div>
       </div>
 
-      {/* Add Lesson Modal */}
+      {/* Add / Edit Lesson Modal */}
       {mentor && showAddLesson && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-2xl shadow-lg w-full max-w-lg p-6 relative">
             <button
-              onClick={() => setShowAddLesson(false)}
+              onClick={() => {
+                setShowAddLesson(false);
+                setIsEditing(false);
+                setSelectedLesson(null);
+                setLessonForm({
+                  title: "",
+                  content: "",
+                  video: null,
+                  thumbnail: null,
+                });
+              }}
               className="absolute top-4 right-4 text-gray-500 hover:text-gray-700"
             >
               <X className="w-6 h-6" />
             </button>
             <h2 className="text-2xl font-bold mb-6 text-center text-green-600">
-              Add New Lesson
+              {isEditing ? "Edit Lesson" : "Add New Lesson"}
             </h2>
             <form onSubmit={handleAddLesson} className="space-y-4">
               <input
@@ -234,26 +334,29 @@ export default function CourseLessons() {
                   setLessonForm({ ...lessonForm, video: e.target.files[0] })
                 }
                 className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-green-500"
-                required
               />
-              <input
+              {/* <input
                 type="file"
                 accept="image/*"
                 onChange={(e) =>
                   setLessonForm({ ...lessonForm, thumbnail: e.target.files[0] })
                 }
                 className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-green-500"
-              />
+              /> */}
               <div className="flex gap-3 mt-4">
                 <button
                   type="submit"
                   className="flex-1 bg-green-600 text-white py-2 rounded-lg hover:bg-green-700"
                 >
-                  Save
+                  {isEditing ? "Update Lesson" : "Save"}
                 </button>
                 <button
                   type="button"
-                  onClick={() => setShowAddLesson(false)}
+                  onClick={() => {
+                    setShowAddLesson(false);
+                    setIsEditing(false);
+                    setSelectedLesson(null);
+                  }}
                   className="flex-1 bg-gray-300 text-gray-800 py-2 rounded-lg hover:bg-gray-400"
                 >
                   Cancel

@@ -20,7 +20,7 @@ const upload = multer({storage:storage})
 
 //  Mentor: Add, Update, Delete
 lessonRouter.post("/add-lesson/:courseId", mentorAuthentication,upload.single("videoUrl"), addLesson);
-lessonRouter.put("/update-lesson/:lessonId", mentorAuthentication, updateLesson);
+lessonRouter.put("/update-lesson/:lessonId", mentorAuthentication,upload.single("videoUrl"), updateLesson);
 lessonRouter.delete("/delete-lesson/:lessonId", mentorAuthentication, deleteLesson);
 
 // admin and Mentor sees all lessons of a course
