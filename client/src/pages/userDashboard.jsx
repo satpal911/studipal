@@ -3,6 +3,7 @@ import axios from "axios";
 import { useUser } from "../context/UserContext";
 import toast from "react-hot-toast";
 import { Menu, X } from "lucide-react";
+import { useRef } from "react";
 
 export default function UserDashboard() {
   const { user, token, logout } = useUser();
@@ -11,7 +12,12 @@ export default function UserDashboard() {
   const [selectedCourse, setSelectedCourse] = useState(null);
   const [lessons, setLessons] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [viewEnrolled, setViewEnrolled] = useState(false);
+  const videoRefs = useRef([]);
+
+  const [viewEnrolled, setViewEnrolled] = useState(
+    localStorage.getItem("viewEnrolled") === "true" // read persisted value
+  );
+
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
@@ -31,7 +37,9 @@ export default function UserDashboard() {
         );
         setAllCourses(approvedCourses);
 
-        const enrolledFull = (enrolledRes.data.data || []).filter((c) => c && c._id);
+        const enrolledFull = (enrolledRes.data.data || []).filter(
+          (c) => c && c._id
+        );
         setEnrolledCourses(enrolledFull);
       } catch (err) {
         console.error(err);
@@ -79,7 +87,8 @@ export default function UserDashboard() {
       if (res.data.success) {
         toast.success("Enrolled successfully!");
         const enrolledCourse = allCourses.find((c) => c && c._id === courseId);
-        if (enrolledCourse) setEnrolledCourses((prev) => [...prev, enrolledCourse]);
+        if (enrolledCourse)
+          setEnrolledCourses((prev) => [...prev, enrolledCourse]);
         else {
           const courseRes = await axios.get(
             `http://localhost:3000/api/v1/course/get-course/${courseId}`,
@@ -103,7 +112,9 @@ export default function UserDashboard() {
     <div className="min-h-screen bg-gray-100 flex">
       <aside
         className={`fixed inset-y-0 left-0 w-64 bg-white shadow-lg p-6 flex flex-col transform transition-transform duration-300 z-40
-        ${sidebarOpen ? "translate-x-0" : "-translate-x-full"} md:translate-x-0`}
+        ${
+          sidebarOpen ? "translate-x-0" : "-translate-x-full"
+        } md:translate-x-0`}
       >
         <div className="flex justify-between items-center mb-8 md:hidden">
           <h2 className="text-2xl font-bold">Dashboard</h2>
@@ -111,13 +122,16 @@ export default function UserDashboard() {
             <X className="w-6 h-6" />
           </button>
         </div>
-          <h2 className="text-blue-600 hidden md:block text-3xl font-bold ">Studipal</h2>
-          <hr className="my-2" />
+        <h2 className="text-blue-600 hidden md:block text-3xl font-bold ">
+          Studipal
+        </h2>
+        <hr className="my-2" />
         {/* <h2 className="hidden md:block text-2xl font-bold mb-8">User Dashboard</h2> */}
 
         <button
           onClick={() => {
             setViewEnrolled(false);
+            localStorage.setItem("viewEnrolled", "false"); // save state
             setSidebarOpen(false);
           }}
           className={`mb-2 px-4 py-2 rounded-lg w-full ${
@@ -131,6 +145,7 @@ export default function UserDashboard() {
         <button
           onClick={() => {
             setViewEnrolled(true);
+            localStorage.setItem("viewEnrolled", "true"); // save state
             setSidebarOpen(false);
           }}
           className={`mb-2 px-4 py-2 rounded-lg w-full ${
@@ -144,6 +159,7 @@ export default function UserDashboard() {
 
         <button
           onClick={() => {
+            localStorage.removeItem("viewEnrolled");
             logout();
             toast.success("Logged out successfully!");
           }}
@@ -172,7 +188,9 @@ export default function UserDashboard() {
             </h1>
 
             {coursesToDisplay.length === 0 && (
-              <p className="text-gray-500 text-center">No courses to display.</p>
+              <p className="text-gray-500 text-center">
+                No courses to display.
+              </p>
             )}
 
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-6">
@@ -255,7 +273,7 @@ export default function UserDashboard() {
                 <p className="text-gray-500">No lessons available.</p>
               ) : (
                 lessons.map(
-                  (lesson) =>
+                  (lesson,index) =>
                     lesson &&
                     lesson._id && (
                       <div
@@ -263,13 +281,24 @@ export default function UserDashboard() {
                         className="bg-white rounded-xl shadow-md hover:shadow-lg transition overflow-hidden"
                       >
                         <div className="p-4">
-                          <h4 className="font-bold text-lg mb-2">{lesson.title}</h4>
+                          <h4 className="font-bold text-lg mb-2">
+                            {lesson.title}
+                          </h4>
                           <p className="text-sm text-gray-600 mb-2 line-clamp-3">
                             {lesson.description}
                           </p>
                           {lesson.videoUrl && (
                             <video
                               controls
+                              ref={(el) => (videoRefs.current[index] = el)} // store reference
+                              onPlay={() => {
+                                // pause all other videos
+                                videoRefs.current.forEach((video, i) => {
+                                  if (video && i !==index && !video.paused) {
+                                    video.pause();
+                                  }
+                                });
+                              }}
                               className="w-full h-48 rounded-lg mt-2"
                             >
                               <source src={lesson.videoUrl} type="video/mp4" />
