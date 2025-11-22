@@ -2,8 +2,6 @@ const Lesson = require("../models/lesson.model");
 const Course = require("../models/course.model");
 // Add Lesson to a Course
 const streamifier = require("streamifier");
-// const Course = require("../models/course.model");
-// const Lesson = require("../models/lesson.model");
 const cloudinary = require("../utils/cloudinary"); 
 
 const addLesson = async (req, res) => {

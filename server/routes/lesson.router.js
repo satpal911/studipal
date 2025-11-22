@@ -25,7 +25,7 @@ lessonRouter.delete("/delete-lesson/:lessonId", mentorAuthentication, deleteLess
 
 // admin and Mentor sees all lessons of a course
 lessonRouter.get("/mentor/get-all-lessons/:courseId", mentorAuthentication, getAllLessons);
-// lessonRouter.get("/admin/get-all-lessons/:courseId", adminAuthentication, getAllLessons)
+
 
 //  User sees all lessons of a course
 lessonRouter.get("/get-all-lessons/:courseId", userAuthentication, getAllLessons);

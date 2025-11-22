@@ -12,19 +12,12 @@ import {
   CheckCircle,
   Menu,
   X,
-  CrossIcon,
-  CrosshairIcon,
   LucideCross,
 } from "lucide-react";
 import {
   Pie,
   Cell,
   PieChart,
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
   Tooltip,
   Legend,
   ResponsiveContainer,
@@ -343,8 +336,8 @@ export default function MentorDashboard() {
               <h3 className="text-lg font-semibold text-gray-800 text-center mb-4">
                 Course Status Overview
               </h3>
-              <div className="h-96">
-                <ResponsiveContainer width="100%" height="100%">
+              <div className="w-full h-96">
+                <ResponsiveContainer width="100%" aspect={1}>
                   <PieChart>
                     <Pie
                       data={[
@@ -553,15 +546,7 @@ export default function MentorDashboard() {
                 required
                 className="border p-2 rounded"
               />
-              {/* <input
-                type="number"
-                placeholder="Order"
-                value={lessonForm.order}
-                onChange={(e) =>
-                  setLessonForm({ ...lessonForm, order: e.target.value })
-                }
-                className="border p-2 rounded"
-              /> */}
+              
               <div className="flex justify-end gap-2 mt-2">
                 <button
                   type="button"
