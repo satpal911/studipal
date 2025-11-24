@@ -425,7 +425,7 @@ export default function MentorDashboard() {
                 Course Status Overview
               </h3>
               <div className="w-full h-96">
-                <ResponsiveContainer width="100%" aspect={1}>
+                <ResponsiveContainer width="100%">
                   <PieChart>
                     <Pie
                       data={[

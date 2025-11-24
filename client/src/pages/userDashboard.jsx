@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import axios from "axios";
 import { useUser } from "../context/UserContext";
 import toast from "react-hot-toast";
@@ -14,35 +14,34 @@ export default function UserDashboard() {
   const [lessons, setLessons] = useState([]);
   const [currentVideo, setCurrentVideo] = useState(null);
   const [loading, setLoading] = useState(true);
-  const videoRefs = useRef([]);
+
   const [viewEnrolled, setViewEnrolled] = useState(
     localStorage.getItem("viewEnrolled") === "true"
   );
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
-  const restoreState = async () => {
-    const savedCourse = localStorage.getItem("selectedCourse");
-    const savedVideo = localStorage.getItem("currentVideo");
+    const restoreState = async () => {
+      const savedCourse = localStorage.getItem("selectedCourse");
+      const savedVideo = localStorage.getItem("currentVideo");
 
-    if (savedCourse) {
-      const course = JSON.parse(savedCourse);
-      if (course && course._id) {
-        // Try to restore lessons from localStorage
-        const savedLessons = localStorage.getItem(`lessons_${course._id}`);
-        if (savedLessons) {
-          setLessons(JSON.parse(savedLessons));
+      if (savedCourse) {
+        const course = JSON.parse(savedCourse);
+        if (course && course._id) {
+          // Try to restore lessons from localStorage
+          const savedLessons = localStorage.getItem(`lessons_${course._id}`);
+          if (savedLessons) {
+            setLessons(JSON.parse(savedLessons));
+          }
+          setSelectedCourse(course);
         }
-        setSelectedCourse(course);
       }
-    }
 
-    if (savedVideo) setCurrentVideo(JSON.parse(savedVideo));
-  };
+      if (savedVideo) setCurrentVideo(JSON.parse(savedVideo));
+    };
 
-  restoreState();
-}, []);
-
+    restoreState();
+  }, []);
 
   // Fetch courses
   useEffect(() => {
@@ -136,16 +135,22 @@ export default function UserDashboard() {
     <div className="min-h-screen bg-gray-100 flex">
       {/* Sidebar */}
       <aside
-        className={`fixed inset-y-0 left-0 w-64 bg-white shadow-lg p-6 flex flex-col transform transition-transform duration-300 z-40 ${
-          sidebarOpen ? "translate-x-0" : "-translate-x-full"
-        } md:translate-x-0`}
+        className={`fixed inset-y-0 left-0 w-64 bg-white shadow-lg p-6 flex flex-col transform transition-transform duration-300 z-40
+    ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}
+    ${
+      selectedCourse
+        ? "-translate-x-full md:-translate-x-full"
+        : "md:translate-x-0"
+    }`}
       >
-        <div className="flex justify-between items-center mb-8 md:hidden">
-          <h2 className="text-2xl font-bold">Dashboard</h2>
-          <button onClick={() => setSidebarOpen(false)}>
-            <X className="w-6 h-6" />
-          </button>
-        </div>
+        {!selectedCourse && (
+          <div className="md:hidden flex justify-between items-center mb-6">
+            <h2 className="text-2xl font-bold text-blue-600">Studipal</h2>
+            <button onClick={() => setSidebarOpen(true)}>
+              <Menu className="w-6 h-6" />
+            </button>
+          </div>
+        )}
 
         <h2 className="text-blue-600 hidden md:block text-3xl font-bold">
           Studipal
@@ -194,7 +199,11 @@ export default function UserDashboard() {
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 p-6 md:ml-64 overflow-y-auto">
+      <main
+        className={`flex-1 p-6 overflow-y-auto transition-all duration-300 ${
+          selectedCourse ? "md:ml-0 md:pt-20" : "md:ml-64"
+        }`}
+      >
         <div className="md:hidden flex justify-between items-center mb-6">
           <h2 className="text-2xl font-bold text-blue-600">Studipal</h2>
           <button onClick={() => setSidebarOpen(true)}>
@@ -281,20 +290,23 @@ export default function UserDashboard() {
         {/* Selected Course */}
         {selectedCourse && (
           <>
-            <button
-              onClick={() => {
-                setSelectedCourse(null);
-                setLessons([]);
-              }}
-              className="mb-6 px-4 py-2 bg-gray-300 rounded-lg hover:bg-gray-400 transition"
-            >
-              ← Back to Courses
-            </button>
+            {/* Navbar-style Back button */}
+            {/* Fixed navbar Back button */}
+            <div className="fixed top-0 left-0 w-full bg-gray-100 shadow-md z-50">
+              <div className="max-w-7xl mx-auto px-6 py-3">
+                <button
+                  onClick={() => {
+                    setSelectedCourse(null);
+                    setLessons([]);
+                  }}
+                  className="block px-4 py-2 bg-gray-300 rounded-lg hover:bg-gray-400 transition shadow"
+                >
+                  ← Back to Courses
+                </button>
+              </div>
+            </div>
 
             <Banner course={selectedCourse} />
-            <h2 className="text-2xl font-bold mb-6 text-gray-800">
-              {selectedCourse.name} - Lessons
-            </h2>
             <Lessons
               lessons={lessons}
               currentVideo={currentVideo}
