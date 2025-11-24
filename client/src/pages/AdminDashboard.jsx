@@ -37,7 +37,14 @@ export default function AdminDashboard() {
   const [allCourses, setAllCourses] = useState([]);
   const [pendingCourses, setPendingCourses] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState("stats");
+  const [activeTab, setActiveTab] = useState(
+    localStorage.getItem("adminActiveTab") || "stats"
+  );
+
+  useEffect(() => {
+    localStorage.setItem("adminActiveTab", activeTab);
+  }, [activeTab]);
+
   const [showAddMentor, setShowAddMentor] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [mentorForm, setMentorForm] = useState({
@@ -352,6 +359,7 @@ export default function AdminDashboard() {
 
         <button
           onClick={() => {
+            localStorage.removeItem("adminActiveTab");
             logout();
             toast.success("Logged out successfully!");
           }}
@@ -383,38 +391,38 @@ export default function AdminDashboard() {
           <div className="space-y-8">
             <div className="flex justify-around">
               <div className="flex justify-center items-center gap-4 bg-white shadow rounded-lg p-5 text-center">
-              <div>
-                <BookOpen className="w-10 h-10" />
+                <div>
+                  <BookOpen className="w-10 h-10" />
+                </div>
+                <div>
+                  <p className="text-gray-600">Total Courses</p>
+                  <p className="font-bold text-3xl text-green-600">
+                    {stats.totalCourses}
+                  </p>
+                </div>
               </div>
-              <div>
-                <p className="text-gray-600">Total Courses</p>
-                <p className="font-bold text-3xl text-green-600">
-                  {stats.totalCourses}
-                </p>
+              <div className="flex justify-center items-center gap-4 bg-white shadow rounded-lg p-5 text-center">
+                <div>
+                  <GraduationCap className="w-10 h-10" />
+                </div>
+                <div>
+                  <p className="text-gray-600">Total Mentors</p>
+                  <p className="font-bold text-3xl text-gray-600">
+                    {stats.totalMentors}
+                  </p>
+                </div>
               </div>
-            </div>
-            <div className="flex justify-center items-center gap-4 bg-white shadow rounded-lg p-5 text-center">
-              <div>
-                <GraduationCap className="w-10 h-10" />
+              <div className="flex justify-center items-center gap-4 bg-white shadow rounded-lg p-5 text-center">
+                <div>
+                  <Users className="w-10 h-10" />
+                </div>
+                <div>
+                  <p className="text-gray-600">Total Users</p>
+                  <p className="font-bold text-3xl text-indigo-600">
+                    {stats.totalUsers}
+                  </p>
+                </div>
               </div>
-              <div>
-                <p className="text-gray-600">Total Mentors</p>
-                <p className="font-bold text-3xl text-gray-600">
-                  {stats.totalMentors}
-                </p>
-              </div>
-            </div>
-            <div className="flex justify-center items-center gap-4 bg-white shadow rounded-lg p-5 text-center">
-              <div>
-                <Users className="w-10 h-10" />
-              </div>
-              <div>
-                <p className="text-gray-600">Total Users</p>
-                <p className="font-bold text-3xl text-indigo-600">
-                  {stats.totalUsers}
-                </p>
-              </div>
-            </div>
             </div>
             <StatsPieChart stats={stats} />
           </div>
@@ -423,32 +431,37 @@ export default function AdminDashboard() {
         {activeTab === "mentors" && (
           <div>
             <h3 className="text-xl font-semibold mb-4">All Mentors</h3>
-            {mentors.length>0?(
+            {mentors.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {mentors.map((mentor) => (
-                <div
-                  key={mentor._id}
-                  className="bg-white shadow rounded-xl p-6"
-                >
-                  <UserIcon/>
-                  <h4 className="font-bold text-lg">Name: {mentor.name}</h4>
-                  <p className="text-gray-600">Email: {mentor.email}</p>
-                  <p className="text-sm text-gray-500">Expertise: {mentor.expertise}</p>
-                </div>
-              ))}
-            </div>
-            ):(
+                {mentors.map((mentor) => (
+                  <div
+                    key={mentor._id}
+                    className="bg-white shadow rounded-xl p-6"
+                  >
+                    <UserIcon />
+                    <h4 className="font-bold text-lg">Name: {mentor.name}</h4>
+                    <p className="text-gray-600">Email: {mentor.email}</p>
+                    <p className="text-sm text-gray-500">
+                      Expertise: {mentor.expertise}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            ) : (
               <div>
-                
-                <p className="text-gray-600 text-xl text-center">no mentors available</p>
-                <p className="text-xl text-gray-600 text-center ">go to "ADD MENTOR" tab to add mentors</p>
+                <p className="text-gray-600 text-xl text-center">
+                  no mentors available
+                </p>
+                <p className="text-xl text-gray-600 text-center ">
+                  go to "ADD MENTOR" tab to add mentors
+                </p>
               </div>
             )}
           </div>
         )}
 
         {/* Courses */}
-        {activeTab === "courses" && (<CourseGrid courses={allCourses} />)}
+        {activeTab === "courses" && <CourseGrid courses={allCourses} />}
         {activeTab === "approved" && (
           <CourseGrid
             courses={allCourses.filter((c) => c.status === "approved")}

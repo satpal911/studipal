@@ -1,9 +1,10 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import axios from "axios";
 import { useUser } from "../context/UserContext";
 import toast from "react-hot-toast";
 import { Menu, X } from "lucide-react";
-import { useRef } from "react";
+import Banner from "./Banner";
+import Lessons from "./Lessons";
 
 export default function UserDashboard() {
   const { user, token, logout } = useUser();
@@ -11,15 +12,39 @@ export default function UserDashboard() {
   const [enrolledCourses, setEnrolledCourses] = useState([]);
   const [selectedCourse, setSelectedCourse] = useState(null);
   const [lessons, setLessons] = useState([]);
+  const [currentVideo, setCurrentVideo] = useState(null);
   const [loading, setLoading] = useState(true);
   const videoRefs = useRef([]);
-
   const [viewEnrolled, setViewEnrolled] = useState(
-    localStorage.getItem("viewEnrolled") === "true" // read persisted value
+    localStorage.getItem("viewEnrolled") === "true"
   );
-
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
+  useEffect(() => {
+  const restoreState = async () => {
+    const savedCourse = localStorage.getItem("selectedCourse");
+    const savedVideo = localStorage.getItem("currentVideo");
+
+    if (savedCourse) {
+      const course = JSON.parse(savedCourse);
+      if (course && course._id) {
+        // Try to restore lessons from localStorage
+        const savedLessons = localStorage.getItem(`lessons_${course._id}`);
+        if (savedLessons) {
+          setLessons(JSON.parse(savedLessons));
+        }
+        setSelectedCourse(course);
+      }
+    }
+
+    if (savedVideo) setCurrentVideo(JSON.parse(savedVideo));
+  };
+
+  restoreState();
+}, []);
+
+
+  // Fetch courses
   useEffect(() => {
     const fetchCourses = async () => {
       if (!token) return;
@@ -48,29 +73,36 @@ export default function UserDashboard() {
         setLoading(false);
       }
     };
-
     fetchCourses();
   }, [token]);
 
+  // Fetch lessons for selected course
   const fetchLessons = async (courseId) => {
     try {
       const res = await axios.get(
         `http://localhost:3000/api/v1/lesson/get-all-lessons/${courseId}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      setLessons(res.data.data || []);
+
+      const lessonsData = res.data.data || [];
+      setLessons(lessonsData);
+
+      // Save lessons to localStorage
+      localStorage.setItem(`lessons_${courseId}`, JSON.stringify(lessonsData));
 
       const course =
         allCourses.find((c) => c && c._id === courseId) ||
         enrolledCourses.find((c) => c && c._id === courseId);
 
       setSelectedCourse(course || null);
+      localStorage.setItem("selectedCourse", JSON.stringify(course || null));
     } catch (err) {
       console.error(err);
       toast.error("Failed to fetch lessons");
     }
   };
 
+  // Enroll in course
   const handleEnroll = async (courseId) => {
     if (enrolledCourses.some((c) => c && c._id === courseId)) {
       toast.error("You are already enrolled in this course");
@@ -89,14 +121,6 @@ export default function UserDashboard() {
         const enrolledCourse = allCourses.find((c) => c && c._id === courseId);
         if (enrolledCourse)
           setEnrolledCourses((prev) => [...prev, enrolledCourse]);
-        else {
-          const courseRes = await axios.get(
-            `http://localhost:3000/api/v1/course/get-course/${courseId}`,
-            { headers: { Authorization: `Bearer ${token}` } }
-          );
-          if (courseRes.data?.data && courseRes.data.data._id)
-            setEnrolledCourses((prev) => [...prev, courseRes.data.data]);
-        }
       } else toast.error(res.data.message || "Enrollment failed");
     } catch (err) {
       console.error("Enroll Error:", err.response?.data || err);
@@ -110,9 +134,9 @@ export default function UserDashboard() {
 
   return (
     <div className="min-h-screen bg-gray-100 flex">
+      {/* Sidebar */}
       <aside
-        className={`fixed inset-y-0 left-0 w-64 bg-white shadow-lg p-6 flex flex-col transform transition-transform duration-300 z-40
-        ${
+        className={`fixed inset-y-0 left-0 w-64 bg-white shadow-lg p-6 flex flex-col transform transition-transform duration-300 z-40 ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
         } md:translate-x-0`}
       >
@@ -122,16 +146,16 @@ export default function UserDashboard() {
             <X className="w-6 h-6" />
           </button>
         </div>
-        <h2 className="text-blue-600 hidden md:block text-3xl font-bold ">
+
+        <h2 className="text-blue-600 hidden md:block text-3xl font-bold">
           Studipal
         </h2>
         <hr className="my-2" />
-        {/* <h2 className="hidden md:block text-2xl font-bold mb-8">User Dashboard</h2> */}
 
         <button
           onClick={() => {
             setViewEnrolled(false);
-            localStorage.setItem("viewEnrolled", "false"); // save state
+            localStorage.setItem("viewEnrolled", "false");
             setSidebarOpen(false);
           }}
           className={`mb-2 px-4 py-2 rounded-lg w-full ${
@@ -145,7 +169,7 @@ export default function UserDashboard() {
         <button
           onClick={() => {
             setViewEnrolled(true);
-            localStorage.setItem("viewEnrolled", "true"); // save state
+            localStorage.setItem("viewEnrolled", "true");
             setSidebarOpen(false);
           }}
           className={`mb-2 px-4 py-2 rounded-lg w-full ${
@@ -169,6 +193,7 @@ export default function UserDashboard() {
         </button>
       </aside>
 
+      {/* Main Content */}
       <main className="flex-1 p-6 md:ml-64 overflow-y-auto">
         <div className="md:hidden flex justify-between items-center mb-6">
           <h2 className="text-2xl font-bold text-blue-600">Studipal</h2>
@@ -177,6 +202,7 @@ export default function UserDashboard() {
           </button>
         </div>
 
+        {/* Courses List */}
         {!selectedCourse && (
           <>
             <h1 className="text-xl sm:text-2xl font-bold mb-6 text-gray-800">
@@ -252,6 +278,7 @@ export default function UserDashboard() {
           </>
         )}
 
+        {/* Selected Course */}
         {selectedCourse && (
           <>
             <button
@@ -264,52 +291,18 @@ export default function UserDashboard() {
               ← Back to Courses
             </button>
 
+            <Banner course={selectedCourse} />
             <h2 className="text-2xl font-bold mb-6 text-gray-800">
               {selectedCourse.name} - Lessons
             </h2>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {lessons.length === 0 ? (
-                <p className="text-gray-500">No lessons available.</p>
-              ) : (
-                lessons.map(
-                  (lesson,index) =>
-                    lesson &&
-                    lesson._id && (
-                      <div
-                        key={lesson._id}
-                        className="bg-white rounded-xl shadow-md hover:shadow-lg transition overflow-hidden"
-                      >
-                        <div className="p-4">
-                          <h4 className="font-bold text-lg mb-2">
-                            {lesson.title}
-                          </h4>
-                          <p className="text-sm text-gray-600 mb-2 line-clamp-3">
-                            {lesson.description}
-                          </p>
-                          {lesson.videoUrl && (
-                            <video
-                              controls
-                              ref={(el) => (videoRefs.current[index] = el)} // store reference
-                              onPlay={() => {
-                                // pause all other videos
-                                videoRefs.current.forEach((video, i) => {
-                                  if (video && i !==index && !video.paused) {
-                                    video.pause();
-                                  }
-                                });
-                              }}
-                              className="w-full h-48 rounded-lg mt-2"
-                            >
-                              <source src={lesson.videoUrl} type="video/mp4" />
-                            </video>
-                          )}
-                        </div>
-                      </div>
-                    )
-                )
-              )}
-            </div>
+            <Lessons
+              lessons={lessons}
+              currentVideo={currentVideo}
+              setCurrentVideo={(video) => {
+                setCurrentVideo(video);
+                localStorage.setItem("currentVideo", JSON.stringify(video));
+              }}
+            />
           </>
         )}
       </main>

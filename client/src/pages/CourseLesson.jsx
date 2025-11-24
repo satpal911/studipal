@@ -1,4 +1,4 @@
-// src/pages/CourseLessons.jsx
+import Lessons from "./Lessons";
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -213,76 +213,14 @@ export default function CourseLessons() {
         </div>
       )}
 
-      <div className="flex flex-col lg:flex-row gap-6">
-        {/* Lessons List */}
-        <div className="lg:w-1/3 space-y-4 overflow-y-auto max-h-[70vh]">
-          {lessons.map((lesson, index) => (
-            <div
-              key={lesson._id}
-              className={`bg-white shadow rounded-xl overflow-hidden ${
-                currentVideo?._id === lesson._id
-                  ? "border-2 border-blue-600"
-                  : ""
-              }`}
-              onClick={() => setCurrentVideo(lesson)}
-            >
-              <img
-                src={getFullImageUrl(
-                  lesson.thumbnail,
-                  "/default-video-thumbnail.jpg"
-                )}
-                alt={lesson.title}
-                className="w-full h-28 object-cover"
-              />
-              <div className="p-3">
-                <h3 className="font-bold text-lg">
-                  {index + 1}. {lesson.title}
-                </h3>
-                <p className="text-gray-500 text-sm line-clamp-2">
-                  {lesson.content}
-                </p>
-
-                {/* ✅ Edit / Delete Buttons */}
-                <div className="flex justify-end gap-3 mt-3">
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleEditLesson(lesson);
-                    }}
-                    className="text-blue-600 hover:text-blue-800"
-                  >
-                    <Edit className="w-5 h-5" />
-                  </button>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleDeleteLesson(lesson._id);
-                    }}
-                    className="text-red-600 hover:text-red-800"
-                  >
-                    <Trash2 className="w-5 h-5" />
-                  </button>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Video Player */}
-        <div className="rounded-xl text-xl text-gray-400 overflow-hidden flex-1">
-          {currentVideo ? (
-            <video
-              key={currentVideo._id}
-              src={currentVideo.videoUrl}
-              controls
-              autoPlay
-              className="w-full h-80 lg:h-[500px] object-cover"
-            />
-          ) : (
-            <p className="text-center p-6">No lessons available</p>
-          )}
-        </div>
-      </div>
+      <Lessons
+        lessons={lessons}
+        currentVideo={currentVideo}
+        setCurrentVideo={setCurrentVideo}
+        canEdit={true}
+        onEdit={handleEditLesson}
+        onDelete={handleDeleteLesson}
+      />
 
       {/* Add / Edit Lesson Modal */}
       {mentor && showAddLesson && (

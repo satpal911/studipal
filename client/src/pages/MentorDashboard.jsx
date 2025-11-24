@@ -33,7 +33,13 @@ export default function MentorDashboard() {
   const [stats, setStats] = useState({});
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState("stats");
+  const [activeTab, setActiveTab] = useState(
+    localStorage.getItem("activeTab") || "stats"
+  );
+
+  useEffect(() => {
+    localStorage.setItem("activeTab", activeTab);
+  }, [activeTab]);
 
   const [showAddCourse, setShowAddCourse] = useState(false);
   const [showAddLesson, setShowAddLesson] = useState(false);
@@ -337,6 +343,7 @@ export default function MentorDashboard() {
 
         <button
           onClick={() => {
+            localStorage.removeItem("activeTab");
             logout();
             toast.success("Logged out successfully!");
           }}
