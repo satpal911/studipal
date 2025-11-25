@@ -189,6 +189,18 @@ export default function UserDashboard() {
         <button
           onClick={() => {
             localStorage.removeItem("viewEnrolled");
+            localStorage.removeItem("selectedCourse");
+            localStorage.removeItem("currentVideo");
+
+            Object.keys(localStorage).forEach((key) => {
+              if (key.startsWith("lessons_")) localStorage.removeItem(key);
+            });
+            setSelectedCourse(null);
+            setLessons([]);
+            setCurrentVideo(null);
+            setEnrolledCourses([]);
+            setAllCourses([]);
+
             logout();
             toast.success("Logged out successfully!");
           }}
@@ -296,10 +308,21 @@ export default function UserDashboard() {
               <div className="max-w-7xl mx-auto px-6 py-3">
                 <button
                   onClick={() => {
+                    // 🧹 Clear stored course data
+                    localStorage.removeItem("selectedCourse");
+                    localStorage.removeItem("currentVideo");
+
+                    Object.keys(localStorage).forEach((key) => {
+                      if (key.startsWith("lessons_"))
+                        localStorage.removeItem(key);
+                    });
+
+                    // 🧠 Reset React states
                     setSelectedCourse(null);
                     setLessons([]);
+                    setCurrentVideo(null);
                   }}
-                  className="block px-4 py-2 bg-gray-300 rounded-lg hover:bg-gray-400 transition shadow"
+                  className="block px-4 py-2 bg-gray-300 rounded-lg hover:bg-gray-400 shadow"
                 >
                   ← Back to Courses
                 </button>

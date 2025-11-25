@@ -15,6 +15,9 @@ import {
   UserIcon,
   CroissantIcon,
   CrossIcon,
+  Edit,
+  Trash2,
+  Edit2,
 } from "lucide-react";
 import {
   Pie,
@@ -48,9 +51,9 @@ export default function AdminDashboard() {
   const [showAddMentor, setShowAddMentor] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [mentorForm, setMentorForm] = useState({
+    _id: "",
     name: "",
     email: "",
-    password: "",
     expertise: "",
   });
 
@@ -140,7 +143,7 @@ export default function AdminDashboard() {
         { headers: { Authorization: `Bearer ${token}` }, withCredentials: true }
       );
       toast.success("Mentor added successfully!");
-      setMentorForm({ name: "", email: "", password: "", expertise: "" });
+      setMentorForm({ _id: "", email: "", password: "", expertise: "" });
       setShowAddMentor(false);
       const mentorsRes = await axios.get(
         "http://localhost:3000/api/v1/admin/all-mentors",
@@ -151,6 +154,54 @@ export default function AdminDashboard() {
       console.error("Failed to add mentor:", error);
       alert("Error adding mentor");
     }
+  };
+
+  // ✅ UPDATE mentor
+  const handleUpdateMentor = async (e) => {
+    e.preventDefault();
+    try {
+      await axios.put(
+        `http://localhost:3000/api/v1/admin/update-mentor/${mentorForm._id}`,
+        mentorForm,
+        { headers: { Authorization: `Bearer ${token}` }, withCredentials: true }
+      );
+      toast.success("Mentor updated successfully!");
+      setMentorForm({ _id: "", name: "", email: "", expertise: "" });
+      setShowAddMentor(false);
+
+      // Refresh mentor list
+      const mentorsRes = await axios.get(
+        "http://localhost:3000/api/v1/admin/all-mentors",
+        { headers: { Authorization: `Bearer ${token}` }, withCredentials: true }
+      );
+      setMentors(mentorsRes.data.data || []);
+    } catch (error) {
+      console.error("Failed to update mentor:", error);
+      toast.error("Error updating mentor");
+    }
+  };
+
+  // ✅ DELETE mentor
+  const handleDeleteMentor = async (mentorId) => {
+    if (!window.confirm("Are you sure you want to delete this mentor?")) return;
+
+    try {
+      await axios.delete(
+        `http://localhost:3000/api/v1/admin/delete-mentor/${mentorId}`,
+        { headers: { Authorization: `Bearer ${token}` }, withCredentials: true }
+      );
+      toast.success("Mentor deleted successfully!");
+      setMentors((prev) => prev.filter((m) => m._id !== mentorId));
+    } catch (error) {
+      console.error("Failed to delete mentor:", error);
+      toast.error("Error deleting mentor");
+    }
+  };
+
+  // ✅ EDIT mentor
+  const handleEditMentor = (mentor) => {
+    setMentorForm(mentor);
+    setShowAddMentor(true);
   };
 
   if (loading) return <p className="text-center mt-10">Loading...</p>;
@@ -231,7 +282,7 @@ export default function AdminDashboard() {
     </h3>
 
     <div className="w-full h-[350px]">
-      <ResponsiveContainer width="100%" height="100%">
+      <ResponsiveContainer width="100%" height="100%" >
         <PieChart>
           <Pie
             data={[
@@ -347,6 +398,14 @@ export default function AdminDashboard() {
           <li>
             <button
               onClick={() => {
+                // Reset the form before opening
+                setMentorForm({
+                  _id: "",
+                  name: "",
+                  email: "",
+                  password: "",
+                  expertise: "",
+                });
                 setShowAddMentor(true);
                 setSidebarOpen(false);
               }}
@@ -389,7 +448,7 @@ export default function AdminDashboard() {
         {/* Stats */}
         {activeTab === "stats" && (
           <div className="space-y-8">
-            <div className="flex justify-around">
+            <div className="flex flex-col sm:flex-row sm:justify-around gap-4 sm:gap-6">
               <div className="flex justify-center items-center gap-4 bg-white shadow rounded-lg p-5 text-center">
                 <div>
                   <BookOpen className="w-10 h-10" />
@@ -436,14 +495,29 @@ export default function AdminDashboard() {
                 {mentors.map((mentor) => (
                   <div
                     key={mentor._id}
-                    className="bg-white shadow rounded-xl p-6"
+                    className="bg-white shadow rounded-xl p-6 flex flex-col justify-between"
                   >
-                    <UserIcon />
-                    <h4 className="font-bold text-lg">Name: {mentor.name}</h4>
-                    <p className="text-gray-600">Email: {mentor.email}</p>
-                    <p className="text-sm text-gray-500">
-                      Expertise: {mentor.expertise}
-                    </p>
+                    {/* Top Row: Icon + Edit/Delete */}
+                    <div className="flex items-center justify-between mb-4">
+                      <UserIcon className="text-blue-600 w-6 h-6" />
+                      <div className="flex items-center gap-3">
+                        <button onClick={() => handleEditMentor(mentor)}>
+                          <Edit2 className="text-yellow-600 w-5 h-5 hover:scale-110 transition" />
+                        </button>
+                        <button onClick={() => handleDeleteMentor(mentor._id)}>
+                          <Trash2 className="text-red-600 w-5 h-5 hover:scale-110 transition" />
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Mentor Info */}
+                    <div>
+                      <h4 className="font-bold text-lg">Name: {mentor.name}</h4>
+                      <p className="text-gray-600">Email: {mentor.email}</p>
+                      <p className="text-sm text-gray-500">
+                        Expertise: {mentor.expertise}
+                      </p>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -491,9 +565,18 @@ export default function AdminDashboard() {
                 <X className="w-6 h-6" />
               </button>
               <h2 className="text-2xl font-bold mb-6 text-center text-green-600">
-                Add New Mentor
+                {mentorForm._id ? "Edit Mentor" : "Add New Mentor"}
               </h2>
-              <form onSubmit={handleAddMentor} className="space-y-4">
+              <form
+                onSubmit={(e) => {
+                  if (mentorForm._id) {
+                    handleUpdateMentor(e);
+                  } else {
+                    handleAddMentor(e);
+                  }
+                }}
+                className="space-y-4"
+              >
                 <input
                   type="text"
                   placeholder="Full Name"
@@ -539,7 +622,7 @@ export default function AdminDashboard() {
                     type="submit"
                     className="flex-1 bg-green-600 text-white py-2 rounded-lg hover:bg-green-700"
                   >
-                    Save
+                    {mentorForm._id ? "Update" : "Save"}
                   </button>
                   <button
                     type="button"

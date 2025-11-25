@@ -229,5 +229,61 @@ const getAllCourses = async (req, res) => {
   }
 };
 
+const deleteMentor = async (req, res) => {
+  try {
+    const { id } = req.params;
 
-module.exports = { registerAdmin, loginAdmin,approveCourse, rejectCourse, addMentor, getAdminStats, getAllMentors, getAllCourses};
+    const mentor = await Mentor.findByIdAndDelete(id);
+    if (!mentor) {
+      return res.status(404).json({ status: 0, message: "Mentor not found" });
+    }
+
+    res.status(200).json({
+      status: 1,
+      message: "Mentor deleted successfully",
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: 0,
+      message: `Server error: ${error.message}`,
+    });
+  }
+};
+
+const updateMentor = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name, email, password, expertise } = req.body;
+
+    const mentor = await Mentor.findById(id);
+    if (!mentor) {
+      return res.status(404).json({ status: 0, message: "Mentor not found" });
+    }
+
+    mentor.name = name || mentor.name;
+    mentor.email = email || mentor.email;
+    mentor.expertise = expertise || mentor.expertise;
+
+    if (password) {
+      const hashedPassword = await bcrypt.hash(password, 10);
+      mentor.password = hashedPassword;
+    }
+
+    await mentor.save();
+
+    res.status(200).json({
+      status: 1,
+      message: "Mentor updated successfully",
+      data: mentor,
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: 0,
+      message: `Server error: ${error.message}`,
+    });
+  }
+};
+
+
+
+module.exports = { registerAdmin, loginAdmin,approveCourse, rejectCourse, addMentor, getAdminStats, getAllMentors, getAllCourses, deleteMentor, updateMentor};

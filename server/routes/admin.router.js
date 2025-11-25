@@ -1,5 +1,5 @@
 const express = require("express")
-const { registerAdmin, loginAdmin, approveCourse, rejectCourse, addMentor, getAdminStats, getAllMentors, getAllCourses } = require("../controllers/admin.controller")
+const { registerAdmin, loginAdmin, approveCourse, rejectCourse, addMentor, getAdminStats, getAllMentors, getAllCourses, updateMentor, deleteMentor } = require("../controllers/admin.controller")
 const adminAuthentication = require("../middleware/auth.admin")
 const { getPendingCourses } = require("../controllers/course.controller")
 const { getCourseLessons } = require("../controllers/lesson.controller")
@@ -24,5 +24,8 @@ adminRouter.get("/pending-courses", adminAuthentication, getPendingCourses)
 adminRouter.get("/all-mentors", adminAuthentication, getAllMentors);
 adminRouter.get("/all-courses", adminAuthentication, getAllCourses);
 adminRouter.get("/course/:courseId/lessons", adminAuthentication, getCourseLessons);
+
+adminRouter.put("/update-mentor/:id", adminAuthentication,updateMentor)
+adminRouter.delete("/delete-mentor/:id", adminAuthentication, deleteMentor)
 
 module.exports = adminRouter
