@@ -50,8 +50,8 @@ export default function UserDashboard() {
       setLoading(true);
       try {
         const [coursesRes, enrolledRes] = await Promise.all([
-          axios.get("http://localhost:3000/api/v1/course/get-all-courses"),
-          axios.get("http://localhost:3000/api/v1/user-enroll/get-enrolled", {
+          axios.get("https://studipal-1.onrender.com/api/v1/course/get-all-courses"),
+          axios.get("https://studipal-1.onrender.com/api/v1/user-enroll/get-enrolled", {
             headers: { Authorization: `Bearer ${token}` },
           }),
         ]);
@@ -79,7 +79,7 @@ export default function UserDashboard() {
   const fetchLessons = async (courseId) => {
     try {
       const res = await axios.get(
-        `http://localhost:3000/api/v1/lesson/get-all-lessons/${courseId}`,
+        `https://studipal-1.onrender.com/api/v1/lesson/get-all-lessons/${courseId}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
@@ -110,7 +110,7 @@ export default function UserDashboard() {
 
     try {
       const res = await axios.post(
-        `http://localhost:3000/api/v1/user-enroll/${courseId}`,
+        `https://studipal-1.onrender.com/api/v1/user-enroll/${courseId}`,
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );

@@ -67,25 +67,25 @@ export default function AdminDashboard() {
         const headers = { Authorization: `Bearer ${token}` };
 
         const statsRes = await axios.get(
-          "http://localhost:3000/api/v1/admin/stats",
+          "https://studipal-1.onrender.com/api/v1/admin/stats",
           { headers, withCredentials: true }
         );
         setStats(statsRes.data.data);
 
         const mentorsRes = await axios.get(
-          "http://localhost:3000/api/v1/admin/all-mentors",
+          "https://studipal-1.onrender.com/api/v1/admin/all-mentors",
           { headers, withCredentials: true }
         );
         setMentors(mentorsRes.data.data || []);
 
         const coursesRes = await axios.get(
-          "http://localhost:3000/api/v1/admin/all-courses",
+          "https://studipal-1.onrender.com/api/v1/admin/all-courses",
           { headers, withCredentials: true }
         );
         setAllCourses(coursesRes.data.data || []);
 
         const pendingRes = await axios.get(
-          "http://localhost:3000/api/v1/admin/pending-courses",
+          "https://studipal-1.onrender.com/api/v1/admin/pending-courses",
           { headers, withCredentials: true }
         );
         setPendingCourses(pendingRes.data.data || []);
@@ -102,7 +102,7 @@ export default function AdminDashboard() {
   const handleApprove = async (courseId) => {
     try {
       await axios.put(
-        `http://localhost:3000/api/v1/admin/approve-course/${courseId}`,
+        `https://studipal-1.onrender.com/api/v1/admin/approve-course/${courseId}`,
         {},
         { headers: { Authorization: `Bearer ${token}` }, withCredentials: true }
       );
@@ -121,7 +121,7 @@ export default function AdminDashboard() {
   const handleReject = async (courseId) => {
     try {
       await axios.put(
-        `http://localhost:3000/api/v1/admin/reject-course/${courseId}`,
+        `https://studipal-1.onrender.com/api/v1/admin/reject-course/${courseId}`,
         {},
         { headers: { Authorization: `Bearer ${token}` }, withCredentials: true }
       );
@@ -138,7 +138,7 @@ export default function AdminDashboard() {
     e.preventDefault();
     try {
       await axios.post(
-        "http://localhost:3000/api/v1/admin/add-mentor",
+        "https://studipal-1.onrender.com/api/v1/admin/add-mentor",
         mentorForm,
         { headers: { Authorization: `Bearer ${token}` }, withCredentials: true }
       );
@@ -146,7 +146,7 @@ export default function AdminDashboard() {
       setMentorForm({ _id: "", email: "", password: "", expertise: "" });
       setShowAddMentor(false);
       const mentorsRes = await axios.get(
-        "http://localhost:3000/api/v1/admin/all-mentors",
+        "https://studipal-1.onrender.com/api/v1/admin/all-mentors",
         { withCredentials: true }
       );
       setMentors(mentorsRes.data.data || []);
@@ -161,7 +161,7 @@ export default function AdminDashboard() {
     e.preventDefault();
     try {
       await axios.put(
-        `http://localhost:3000/api/v1/admin/update-mentor/${mentorForm._id}`,
+        `https://studipal-1.onrender.com/api/v1/admin/update-mentor/${mentorForm._id}`,
         mentorForm,
         { headers: { Authorization: `Bearer ${token}` }, withCredentials: true }
       );
@@ -171,7 +171,7 @@ export default function AdminDashboard() {
 
       // Refresh mentor list
       const mentorsRes = await axios.get(
-        "http://localhost:3000/api/v1/admin/all-mentors",
+        "https://studipal-1.onrender.com/api/v1/admin/all-mentors",
         { headers: { Authorization: `Bearer ${token}` }, withCredentials: true }
       );
       setMentors(mentorsRes.data.data || []);
@@ -187,7 +187,7 @@ export default function AdminDashboard() {
 
     try {
       await axios.delete(
-        `http://localhost:3000/api/v1/admin/delete-mentor/${mentorId}`,
+        `https://studipal-1.onrender.com/api/v1/admin/delete-mentor/${mentorId}`,
         { headers: { Authorization: `Bearer ${token}` }, withCredentials: true }
       );
       toast.success("Mentor deleted successfully!");
@@ -263,7 +263,7 @@ export default function AdminDashboard() {
     try {
       const headers = { Authorization: `Bearer ${token}` };
       const res = await axios.get(
-        `http://localhost:3000/api/v1/admin/course/${courseId}/lessons`,
+        `https://studipal-1.onrender.com/api/v1/admin/course/${courseId}/lessons`,
         { headers, withCredentials: true }
       );
       setLessons(res.data.data || []);

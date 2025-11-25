@@ -15,7 +15,7 @@ export default function Courses() {
     const fetchCourses = async () => {
       try {
         const res = await axios.get(
-          "http://localhost:3000/api/v1/course/get-all-courses"
+          "https://studipal-1.onrender.com/api/v1/course/get-all-courses"
         );
         setCourses(res.data.data || []);
       } catch (err) {
@@ -35,7 +35,7 @@ export default function Courses() {
 
     try {
       await axios.post(
-        `http://localhost:3000/api/v1/courses/enroll/${courseId}`,
+        `https://studipal-1.onrender.com/api/v1/courses/enroll/${courseId}`,
         {},
         {
           headers: { Authorization: `Bearer ${token}` },

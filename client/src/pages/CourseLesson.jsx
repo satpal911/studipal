@@ -45,11 +45,11 @@ export default function CourseLessons() {
 
         const [courseRes, lessonsRes] = await Promise.all([
           axios.get(
-            `http://localhost:3000/api/v1/course/get-one-course/${courseId}`,
+            `https://studipal-1.onrender.com/api/v1/course/get-one-course/${courseId}`,
             { headers, withCredentials: true }
           ),
           axios.get(
-            `http://localhost:3000/api/v1/lesson/mentor/get-all-lessons/${courseId}`,
+            `https://studipal-1.onrender.com/api/v1/lesson/mentor/get-all-lessons/${courseId}`,
             { headers, withCredentials: true }
           ),
         ]);
@@ -93,7 +93,7 @@ export default function CourseLessons() {
       if (isEditing && selectedLesson) {
         // ✏️ update existing lesson
         await axios.put(
-          `http://localhost:3000/api/v1/lesson/update-lesson/${selectedLesson._id}`,
+          `https://studipal-1.onrender.com/api/v1/lesson/update-lesson/${selectedLesson._id}`,
           formData,
           {
             headers: {
@@ -105,7 +105,7 @@ export default function CourseLessons() {
       } else {
         // ➕ add new lesson
         await axios.post(
-          `http://localhost:3000/api/v1/lesson/add-lesson/${courseId}`,
+          `https://studipal-1.onrender.com/api/v1/lesson/add-lesson/${courseId}`,
           formData,
           {
             headers: {
@@ -118,7 +118,7 @@ export default function CourseLessons() {
 
       // Refresh lessons
       const lessonsRes = await axios.get(
-        `http://localhost:3000/api/v1/lesson/mentor/get-all-lessons/${courseId}`,
+        `https://studipal-1.onrender.com/api/v1/lesson/mentor/get-all-lessons/${courseId}`,
         {
           headers: { Authorization: `Bearer ${token}` },
           withCredentials: true,
@@ -160,13 +160,13 @@ export default function CourseLessons() {
 
     try {
       await axios.delete(
-        `http://localhost:3000/api/v1/lesson/delete-lesson/${id}`,
+        `https://studipal-1.onrender.com/api/v1/lesson/delete-lesson/${id}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
       // Refresh lessons
       const lessonsRes = await axios.get(
-        `http://localhost:3000/api/v1/lesson/mentor/get-all-lessons/${courseId}`,
+        `https://studipal-1.onrender.com/api/v1/lesson/mentor/get-all-lessons/${courseId}`,
         {
           headers: { Authorization: `Bearer ${token}` },
           withCredentials: true,
