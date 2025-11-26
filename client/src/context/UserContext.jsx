@@ -18,7 +18,7 @@ export const UserProvider = ({ children }) => {
     try {
       setLoading(true);
       const res = await axios.post(
-        "http://localhost:3000/api/v1/user/register",
+        `${API}/api/v1/user/register`,
         { name, email, password },
         { withCredentials: true }
       );
@@ -46,7 +46,7 @@ export const UserProvider = ({ children }) => {
     try {
       setLoading(true);
       const res = await axios.post(
-        "http://localhost:3000/api/v1/user/login",
+        `${API}/api/v1/user/login`,
         { email, password },
         { withCredentials: true }
       );
