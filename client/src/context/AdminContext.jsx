@@ -2,6 +2,7 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { API } from "../api";
 
 const AdminContext = createContext();
 
@@ -47,7 +48,7 @@ export const AdminProvider = ({ children }) => {
     const fetchAdmin = async () => {
       if (!token) return;
       try {
-        const res = await axios.get("http://localhost:3000/api/v1/admin/me", {
+        const res = await axios.get(`${API}/api/v1/admin/me`, {
           headers: { Authorization: `Bearer ${token}` },
           withCredentials: true,
         });

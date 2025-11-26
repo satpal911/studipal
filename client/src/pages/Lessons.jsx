@@ -11,7 +11,7 @@ export default function Lessons({
 }) {
   return (
     <div className="flex flex-col lg:flex-row gap-6">
-      {/* 🔹 Lessons List Section */}
+      {/*Lessons List */}
       <div className="lg:w-1/3 space-y-4 overflow-y-auto max-h-[70vh]">
         {lessons.length === 0 && (
           <p className="text-gray-500 text-center">No lessons available.</p>
@@ -41,7 +41,7 @@ export default function Lessons({
                 {lesson.content}
               </p>
 
-              {/* 🔹 Show Edit/Delete Buttons only if canEdit is true */}
+              {/* Show Edit/Delete Buttons*/}
               {canEdit && (
                 <div className="flex justify-end gap-3 mt-3">
                   <button
@@ -69,7 +69,7 @@ export default function Lessons({
         ))}
       </div>
 
-      {/* 🔹 Video Player Section */}
+      {/* Video Player */}
       <div className="rounded-xl text-xl text-gray-400 overflow-hidden flex-1">
         {currentVideo ? (
           <video

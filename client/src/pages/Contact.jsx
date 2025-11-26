@@ -2,6 +2,7 @@ import { useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { toast } from "react-hot-toast";
+import { API } from "../api";
 
 export default function Contact() {
   const location = useLocation();
@@ -28,7 +29,7 @@ export default function Contact() {
 
     try {
       const res = await axios.post(
-        `${import.meta.env.VITE_API_URL}/contact`,
+        `${API}/api/v1/contact`,
         formData
       );
       toast.success(res.data.message || "Message sent successfully!");

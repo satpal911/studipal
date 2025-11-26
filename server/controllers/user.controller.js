@@ -2,7 +2,6 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const User = require("../models/user.model");
 
-// REGISTER USER
 const registerUser = async (req, res) => {
   try {
     const { name, email, password } = req.body;
@@ -31,7 +30,6 @@ const registerUser = async (req, res) => {
   }
 };
 
-// LOGIN USER
 const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -57,7 +55,7 @@ const loginUser = async (req, res) => {
     res.cookie("token", token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
+      sameSite: "None",
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
@@ -67,7 +65,6 @@ const loginUser = async (req, res) => {
   }
 };
 
-//Get Profile
 const getProfile = async (req, res) => {
   try {
     const user = await User.findById(req.user.id).select("-password");
@@ -80,7 +77,6 @@ const getProfile = async (req, res) => {
   }
 };
 
-//Update Name
 const updateName = async (req, res) => {
   try {
     const { name } = req.body;
@@ -100,7 +96,6 @@ const updateName = async (req, res) => {
   }
 };
 
-//Update Password
 const updatePassword = async (req, res) => {
   try {
     const { oldPassword, newPassword } = req.body;

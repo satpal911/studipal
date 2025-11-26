@@ -1,7 +1,6 @@
 const User = require("../models/user.model");
 const Course = require("../models/course.model");
 
-// Enroll a student into a course
 const enrollCourse = async (req, res) => {
   try {
     const { courseId } = req.params;
@@ -54,7 +53,6 @@ const enrollCourse = async (req, res) => {
   }
 };
 
-//Get enrolled courses
 const getEnrolled = async (req, res) => {
   try {
     const userId = req.user.id;

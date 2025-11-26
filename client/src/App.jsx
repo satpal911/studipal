@@ -14,7 +14,7 @@ import LandingPage from "./pages/LandingPage";
 import Contact from "./pages/Contact";
 import CourseLessons from "./pages/CourseLesson";
 import { Toaster } from "react-hot-toast";
-
+import {API} from "./api"
 export default function App() {
   const navigate = useNavigate();
   const location = useLocation();

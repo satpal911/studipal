@@ -26,6 +26,7 @@ import {
 } from "recharts";
 
 import { useNavigate } from "react-router-dom";
+import { API } from "../api";
 
 export default function MentorDashboard() {
   const { mentor, token, logout } = useMentor();
@@ -69,7 +70,7 @@ export default function MentorDashboard() {
     try {
       const headers = { Authorization: `Bearer ${token}` };
       const res = await axios.get(
-        "https://studipal-1.onrender.com/api/v1/course/mentor/get-all-courses",
+        `${API}/api/v1/course/mentor/get-all-courses`,
         { headers, withCredentials: true }
       );
       const allCourses = res.data.data || [];
@@ -115,9 +116,9 @@ export default function MentorDashboard() {
         formData.append("thumbnail", courseForm.thumbnail);
 
       if (selectedCourse) {
-        // 🟢 Update existing course
+        //Update course
         await axios.put(
-          `https://studipal-1.onrender.com/api/v1/course/update-course/${selectedCourse._id}`,
+          `${API}/api/v1/course/update-course/${selectedCourse._id}`,
           formData,
           {
             headers: {
@@ -128,9 +129,9 @@ export default function MentorDashboard() {
         );
         toast.success("Course updated successfully!");
       } else {
-        // 🟢 Add new course
+        // Add new course
         await axios.post(
-          "https://studipal-1.onrender.com/api/v1/course/add-course",
+          `${API}/api/v1/course/add-course`,
           formData,
           {
             headers: {
@@ -160,7 +161,7 @@ export default function MentorDashboard() {
     }
   };
 
-  // ✏️ Edit Course
+  // Edit Course
   const handleEditCourse = (course) => {
     setSelectedCourse(course);
     setCourseForm({
@@ -172,12 +173,12 @@ export default function MentorDashboard() {
     setShowAddCourse(true);
   };
 
-  // 🗑️ Delete Course
+  // Delete Course
   const handleDeleteCourse = async (id) => {
     if (!window.confirm("Are you sure you want to delete this course?")) return;
     try {
       await axios.delete(
-        `https://studipal-1.onrender.com/api/v1/course/delete-course/${id}`,
+        `${API}/api/v1/course/delete-course/${id}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       toast.success("Course deleted successfully!");
@@ -202,7 +203,7 @@ export default function MentorDashboard() {
       formData.append("videoUrl", lessonForm.video);
 
       await axios.post(
-        `https://studipal-1.onrender.com/api/v1/lesson/add-lesson/${selectedCourse._id}`,
+        `${API}/api/v1/lesson/add-lesson/${selectedCourse._id}`,
         formData,
         {
           headers: {

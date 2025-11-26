@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { useAdmin } from "../context/AdminContext";
 import toast from "react-hot-toast";
+import { API } from "../api";
 import {
   Users,
   GraduationCap,
@@ -67,25 +68,25 @@ export default function AdminDashboard() {
         const headers = { Authorization: `Bearer ${token}` };
 
         const statsRes = await axios.get(
-          "https://studipal-1.onrender.com/api/v1/admin/stats",
+          `${API}/api/v1/admin/stats`,
           { headers, withCredentials: true }
         );
         setStats(statsRes.data.data);
 
         const mentorsRes = await axios.get(
-          "https://studipal-1.onrender.com/api/v1/admin/all-mentors",
+          `${API}/api/v1/admin/all-mentors`,
           { headers, withCredentials: true }
         );
         setMentors(mentorsRes.data.data || []);
 
         const coursesRes = await axios.get(
-          "https://studipal-1.onrender.com/api/v1/admin/all-courses",
+          `${API}/api/v1/admin/all-courses`,
           { headers, withCredentials: true }
         );
         setAllCourses(coursesRes.data.data || []);
 
         const pendingRes = await axios.get(
-          "https://studipal-1.onrender.com/api/v1/admin/pending-courses",
+          `${API}/api/v1/admin/pending-courses`,
           { headers, withCredentials: true }
         );
         setPendingCourses(pendingRes.data.data || []);
@@ -102,7 +103,7 @@ export default function AdminDashboard() {
   const handleApprove = async (courseId) => {
     try {
       await axios.put(
-        `https://studipal-1.onrender.com/api/v1/admin/approve-course/${courseId}`,
+        `${API}/api/v1/admin/approve-course/${courseId}`,
         {},
         { headers: { Authorization: `Bearer ${token}` }, withCredentials: true }
       );
@@ -121,7 +122,7 @@ export default function AdminDashboard() {
   const handleReject = async (courseId) => {
     try {
       await axios.put(
-        `https://studipal-1.onrender.com/api/v1/admin/reject-course/${courseId}`,
+        `${API}/api/v1/admin/reject-course/${courseId}`,
         {},
         { headers: { Authorization: `Bearer ${token}` }, withCredentials: true }
       );
@@ -138,7 +139,7 @@ export default function AdminDashboard() {
     e.preventDefault();
     try {
       await axios.post(
-        "https://studipal-1.onrender.com/api/v1/admin/add-mentor",
+        `${API}/api/v1/admin/add-mentor`,
         mentorForm,
         { headers: { Authorization: `Bearer ${token}` }, withCredentials: true }
       );
@@ -146,7 +147,7 @@ export default function AdminDashboard() {
       setMentorForm({ _id: "", email: "", password: "", expertise: "" });
       setShowAddMentor(false);
       const mentorsRes = await axios.get(
-        "https://studipal-1.onrender.com/api/v1/admin/all-mentors",
+        `${API}/api/v1/admin/all-mentors`,
         { withCredentials: true }
       );
       setMentors(mentorsRes.data.data || []);
@@ -156,12 +157,12 @@ export default function AdminDashboard() {
     }
   };
 
-  // ✅ UPDATE mentor
+  // UPDATE mentor
   const handleUpdateMentor = async (e) => {
     e.preventDefault();
     try {
       await axios.put(
-        `https://studipal-1.onrender.com/api/v1/admin/update-mentor/${mentorForm._id}`,
+        `${API}/api/v1/admin/update-mentor/${mentorForm._id}`,
         mentorForm,
         { headers: { Authorization: `Bearer ${token}` }, withCredentials: true }
       );
@@ -171,7 +172,7 @@ export default function AdminDashboard() {
 
       // Refresh mentor list
       const mentorsRes = await axios.get(
-        "https://studipal-1.onrender.com/api/v1/admin/all-mentors",
+        `${API}/api/v1/admin/all-mentors`,
         { headers: { Authorization: `Bearer ${token}` }, withCredentials: true }
       );
       setMentors(mentorsRes.data.data || []);
@@ -181,13 +182,13 @@ export default function AdminDashboard() {
     }
   };
 
-  // ✅ DELETE mentor
+  // DELETE mentor
   const handleDeleteMentor = async (mentorId) => {
     if (!window.confirm("Are you sure you want to delete this mentor?")) return;
 
     try {
       await axios.delete(
-        `https://studipal-1.onrender.com/api/v1/admin/delete-mentor/${mentorId}`,
+        `${API}/api/v1/admin/delete-mentor/${mentorId}`,
         { headers: { Authorization: `Bearer ${token}` }, withCredentials: true }
       );
       toast.success("Mentor deleted successfully!");
@@ -198,7 +199,7 @@ export default function AdminDashboard() {
     }
   };
 
-  // ✅ EDIT mentor
+  // EDIT mentor
   const handleEditMentor = (mentor) => {
     setMentorForm(mentor);
     setShowAddMentor(true);
@@ -263,7 +264,7 @@ export default function AdminDashboard() {
     try {
       const headers = { Authorization: `Bearer ${token}` };
       const res = await axios.get(
-        `https://studipal-1.onrender.com/api/v1/admin/course/${courseId}/lessons`,
+        `${API}/api/v1/admin/course/${courseId}/lessons`,
         { headers, withCredentials: true }
       );
       setLessons(res.data.data || []);
@@ -350,7 +351,7 @@ export default function AdminDashboard() {
 
   return (
     <div className="min-h-screen bg-gray-100 flex">
-      {/* Sidebar (desktop + mobile overlay) */}
+      {/* Sidebar*/}
       <div
         className={`fixed inset-y-0 left-0 w-64 bg-white shadow-lg p-4 flex flex-col transform transition-transform duration-300 z-40
         ${
@@ -398,7 +399,7 @@ export default function AdminDashboard() {
           <li>
             <button
               onClick={() => {
-                // Reset the form before opening
+                // Reset form
                 setMentorForm({
                   _id: "",
                   name: "",
@@ -497,7 +498,7 @@ export default function AdminDashboard() {
                     key={mentor._id}
                     className="bg-white shadow rounded-xl p-6 flex flex-col justify-between"
                   >
-                    {/* Top Row: Icon + Edit/Delete */}
+                    {/*Edit Delete */}
                     <div className="flex items-center justify-between mb-4">
                       <UserIcon className="text-blue-600 w-6 h-6" />
                       <div className="flex items-center gap-3">
@@ -554,7 +555,7 @@ export default function AdminDashboard() {
           </div>
         )}
 
-        {/* Add Mentor Modal */}
+        {/* Add Mentor*/}
         {showAddMentor && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
             <div className="bg-white rounded-2xl shadow-lg w-full max-w-lg p-6 relative">

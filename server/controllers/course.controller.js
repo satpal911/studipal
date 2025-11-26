@@ -7,7 +7,6 @@ const addCourse = async (req, res) => {
     const { name, description, category } = req.body;
     const thumbnail = req.file
 
-    // Validate required fields
     if (!name || !description || !category || !thumbnail) {
       return res.status(400).json({
         status: 0,
@@ -20,7 +19,6 @@ const addCourse = async (req, res) => {
       folder: "studipal/courses",
     });
 
-    // remove local file
     fs.unlinkSync(req.file.path);
 
     const course = new Course({
@@ -28,7 +26,7 @@ const addCourse = async (req, res) => {
       description,
       category,
       thumbnail: result.secure_url,
-      mentor: req.mentor ? req.mentor._id : undefined, // set from auth if available
+      mentor: req.mentor ? req.mentor._id : undefined,
       lessons: [], 
       studentsEnrolled: [], 
       status: "pending"
@@ -60,7 +58,7 @@ const getAllCourses = async(req, res) => {
     res.status(200).json({
       status: 1,
       message: "All approved courses fetched successfully",
-      data: allCourses, // frontend should use res.data.data
+      data: allCourses,
     });
   } catch (error) {
     res.status(500).json({
@@ -97,13 +95,11 @@ const updateCourse = async (req, res) => {
     const { id } = req.params;
     const { name, description, category } = req.body;
 
-    // Find the existing course
     const course = await Course.findById(id);
     if (!course) {
       return res.status(404).json({ status: 0, message: "Course not found" });
     }
 
-    // Ensure only the mentor who owns the course can update
     if (course.mentor.toString() !== req.mentor._id.toString()) {
       return res.status(403).json({
         status: 0,
@@ -111,16 +107,13 @@ const updateCourse = async (req, res) => {
       });
     }
 
-    // Prepare update object
     const updateData = {
       name: name || course.name,
       description: description || course.description,
       category: category || course.category,
     };
 
-    // ✅ Handle thumbnail replacement
     if (req.file) {
-      // Delete old Cloudinary thumbnail if exists
       if (course.thumbnail) {
         try {
           const publicId = course.thumbnail
@@ -141,7 +134,6 @@ const updateCourse = async (req, res) => {
       updateData.thumbnail = result.secure_url;
     }
 
-    // ✅ Update the existing course directly
     const updatedCourse = await Course.findByIdAndUpdate(id, updateData, {
       new: true,
     });
@@ -180,7 +172,6 @@ const deleteCourse = async(req, res) => {
     }
 };
 
-//  Get all courses for mentor
 const getAllCoursesMentor = async (req, res) => {
     try {
         const allCoursesMentor = await Course.find({ mentor: req.mentor._id }).populate("mentor", "name email");

@@ -1,6 +1,5 @@
 const Lesson = require("../models/lesson.model");
 const Course = require("../models/course.model");
-// Add Lesson to a Course
 const streamifier = require("streamifier");
 const cloudinary = require("../utils/cloudinary"); 
 
@@ -14,7 +13,6 @@ const addLesson = async (req, res) => {
       return res.status(404).json({ message: "Course not found" });
     }
 
-    // Upload video to Cloudinary
     const videoUpload = await new Promise((resolve, reject) => {
       const stream = cloudinary.uploader.upload_stream(
         {
@@ -22,7 +20,7 @@ const addLesson = async (req, res) => {
           folder: "lesson_video",
           public_id: `video${course._id}_${Date.now()}`,
            eager: [
-            { width: 320, height: 180, crop: "fill", format: "jpg" } // generates thumbnail
+            { width: 320, height: 180, crop: "fill", format: "jpg" } 
           ],
         },
         (error, result) => {
@@ -34,7 +32,6 @@ const addLesson = async (req, res) => {
       streamifier.createReadStream(req.file.buffer).pipe(stream);
     });
 
-    // Save lesson with Cloudinary
     const newLesson = new Lesson({
       title,
       content,
@@ -137,7 +134,6 @@ const deleteLesson = async (req, res) => {
 const getCourseLessons = async (req, res) => {
  try {
  const { courseId } = req.params;
- //lessons sorted by order
  const lessons = await Lesson.find({ courseId }).sort({ order: 1 });
 
  res.status(200).json({

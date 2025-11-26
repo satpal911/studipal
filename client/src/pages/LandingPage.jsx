@@ -4,7 +4,6 @@ import { Link } from "react-router-dom";
 export default function LandingPage() {
   return (
     <div className="bg-gray-50">
-      {/* Hero Section */}
       <section className="bg-gradient-to-r from-indigo-600 to-blue-600 text-white py-20">
         <div className="max-w-6xl mx-auto px-6 text-center">
           <h1 className="text-4xl md:text-6xl font-bold mb-4">

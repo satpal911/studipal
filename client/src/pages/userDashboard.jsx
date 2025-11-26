@@ -5,6 +5,7 @@ import toast from "react-hot-toast";
 import { Menu, X } from "lucide-react";
 import Banner from "./Banner";
 import Lessons from "./Lessons";
+import { API } from "../api";
 
 export default function UserDashboard() {
   const { user, token, logout } = useUser();
@@ -50,8 +51,8 @@ export default function UserDashboard() {
       setLoading(true);
       try {
         const [coursesRes, enrolledRes] = await Promise.all([
-          axios.get("https://studipal-1.onrender.com/api/v1/course/get-all-courses"),
-          axios.get("https://studipal-1.onrender.com/api/v1/user-enroll/get-enrolled", {
+          axios.get(`${API}/api/v1/course/get-all-courses`),
+          axios.get(`${API}/api/v1/user-enroll/get-enrolled`, {
             headers: { Authorization: `Bearer ${token}` },
           }),
         ]);
@@ -79,7 +80,7 @@ export default function UserDashboard() {
   const fetchLessons = async (courseId) => {
     try {
       const res = await axios.get(
-        `https://studipal-1.onrender.com/api/v1/lesson/get-all-lessons/${courseId}`,
+        `${API}/api/v1/lesson/get-all-lessons/${courseId}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
@@ -110,7 +111,7 @@ export default function UserDashboard() {
 
     try {
       const res = await axios.post(
-        `https://studipal-1.onrender.com/api/v1/user-enroll/${courseId}`,
+        `${API}/api/v1/user-enroll/${courseId}`,
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -302,13 +303,11 @@ export default function UserDashboard() {
         {/* Selected Course */}
         {selectedCourse && (
           <>
-            {/* Navbar-style Back button */}
-            {/* Fixed navbar Back button */}
             <div className="fixed top-0 left-0 w-full bg-gray-100 shadow-md z-50">
               <div className="max-w-7xl mx-auto px-6 py-3">
                 <button
                   onClick={() => {
-                    // 🧹 Clear stored course data
+                    //  Clear course data
                     localStorage.removeItem("selectedCourse");
                     localStorage.removeItem("currentVideo");
 
@@ -317,7 +316,7 @@ export default function UserDashboard() {
                         localStorage.removeItem(key);
                     });
 
-                    // 🧠 Reset React states
+                    //Reset states
                     setSelectedCourse(null);
                     setLessons([]);
                     setCurrentVideo(null);

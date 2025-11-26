@@ -2,6 +2,7 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { API } from "../api";
 
 const MentorContext = createContext();
 
@@ -55,7 +56,7 @@ export const MentorProvider = ({ children }) => {
     const fetchMentor = async () => {
       if (!token) return;
       try {
-        const res = await axios.get("http://localhost:3000/api/v1/mentor/me", {
+        const res = await axios.get(`${API}/api/v1/mentor/me`, {
           headers: { Authorization: `Bearer ${token}` },
           withCredentials: true,
         });

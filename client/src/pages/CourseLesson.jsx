@@ -3,7 +3,8 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useMentor } from "../context/MentorContext";
-import { X, Edit, Trash2 } from "lucide-react"; // ✅ added icons
+import { X, Edit, Trash2 } from "lucide-react";
+import { API } from "../api";
 
 export default function CourseLessons() {
   const { courseId } = useParams();
@@ -23,11 +24,9 @@ export default function CourseLessons() {
     thumbnail: null,
   });
 
-  // ✅ added for edit functionality
   const [selectedLesson, setSelectedLesson] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
 
-  // Helper to get full image URL or fallback
   const getFullImageUrl = (path, fallback) => {
     if (!path || path.trim() === "") return fallback; // fallback if empty
     if (path.startsWith("http") || path.startsWith("https")) return path;
@@ -45,11 +44,11 @@ export default function CourseLessons() {
 
         const [courseRes, lessonsRes] = await Promise.all([
           axios.get(
-            `https://studipal-1.onrender.com/api/v1/course/get-one-course/${courseId}`,
+            `${API}/api/v1/course/get-one-course/${courseId}`,
             { headers, withCredentials: true }
           ),
           axios.get(
-            `https://studipal-1.onrender.com/api/v1/lesson/mentor/get-all-lessons/${courseId}`,
+            `${API}/api/v1/lesson/mentor/get-all-lessons/${courseId}`,
             { headers, withCredentials: true }
           ),
         ]);
@@ -76,7 +75,6 @@ export default function CourseLessons() {
     fetchData();
   }, [courseId, token]);
 
-  // ✅ unified Add / Edit handler
   const handleAddLesson = async (e) => {
     e.preventDefault();
     if (!lessonForm.title || !lessonForm.content)
@@ -91,9 +89,9 @@ export default function CourseLessons() {
         formData.append("thumbnail", lessonForm.thumbnail);
 
       if (isEditing && selectedLesson) {
-        // ✏️ update existing lesson
+        //update lesson
         await axios.put(
-          `https://studipal-1.onrender.com/api/v1/lesson/update-lesson/${selectedLesson._id}`,
+          `${API}/api/v1/lesson/update-lesson/${selectedLesson._id}`,
           formData,
           {
             headers: {
@@ -103,9 +101,9 @@ export default function CourseLessons() {
           }
         );
       } else {
-        // ➕ add new lesson
+        //add new lesson
         await axios.post(
-          `https://studipal-1.onrender.com/api/v1/lesson/add-lesson/${courseId}`,
+          `${API}/api/v1/lesson/add-lesson/${courseId}`,
           formData,
           {
             headers: {
@@ -118,7 +116,7 @@ export default function CourseLessons() {
 
       // Refresh lessons
       const lessonsRes = await axios.get(
-        `https://studipal-1.onrender.com/api/v1/lesson/mentor/get-all-lessons/${courseId}`,
+        `${API}/api/v1/lesson/mentor/get-all-lessons/${courseId}`,
         {
           headers: { Authorization: `Bearer ${token}` },
           withCredentials: true,
@@ -141,7 +139,7 @@ export default function CourseLessons() {
     }
   };
 
-  // ✏️ Edit Lesson (✅ added)
+  //Edit Lesson
   const handleEditLesson = (lesson) => {
     setSelectedLesson(lesson);
     setLessonForm({
@@ -154,19 +152,19 @@ export default function CourseLessons() {
     setShowAddLesson(true);
   };
 
-  // 🗑 Delete Lesson (✅ added)
+  //Delete Lesson
   const handleDeleteLesson = async (id) => {
     if (!window.confirm("Are you sure you want to delete this lesson?")) return;
 
     try {
       await axios.delete(
-        `https://studipal-1.onrender.com/api/v1/lesson/delete-lesson/${id}`,
+        `${API}/api/v1/lesson/delete-lesson/${id}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
       // Refresh lessons
       const lessonsRes = await axios.get(
-        `https://studipal-1.onrender.com/api/v1/lesson/mentor/get-all-lessons/${courseId}`,
+        `${API}/api/v1/lesson/mentor/get-all-lessons/${courseId}`,
         {
           headers: { Authorization: `Bearer ${token}` },
           withCredentials: true,
@@ -222,7 +220,7 @@ export default function CourseLessons() {
         onDelete={handleDeleteLesson}
       />
 
-      {/* Add / Edit Lesson Modal */}
+      {/* Add / Edit Lesson*/}
       {mentor && showAddLesson && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-2xl shadow-lg w-full max-w-lg p-6 relative">
@@ -273,14 +271,7 @@ export default function CourseLessons() {
                 }
                 className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-green-500"
               />
-              {/* <input
-                type="file"
-                accept="image/*"
-                onChange={(e) =>
-                  setLessonForm({ ...lessonForm, thumbnail: e.target.files[0] })
-                }
-                className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-green-500"
-              /> */}
+              
               <div className="flex gap-3 mt-4">
                 <button
                   type="submit"

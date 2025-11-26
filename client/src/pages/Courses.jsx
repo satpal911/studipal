@@ -1,8 +1,8 @@
-// src/pages/Courses.jsx
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useUser } from "../context/UserContext";
+import { API } from "../api";
 
 export default function Courses() {
   const [courses, setCourses] = useState([]);
@@ -15,7 +15,7 @@ export default function Courses() {
     const fetchCourses = async () => {
       try {
         const res = await axios.get(
-          "https://studipal-1.onrender.com/api/v1/course/get-all-courses"
+          `${API}/api/v1/course/get-all-courses`
         );
         setCourses(res.data.data || []);
       } catch (err) {
@@ -35,7 +35,7 @@ export default function Courses() {
 
     try {
       await axios.post(
-        `https://studipal-1.onrender.com/api/v1/courses/enroll/${courseId}`,
+        `${API}/api/v1/courses/enroll/${courseId}`,
         {},
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -76,7 +76,7 @@ export default function Courses() {
               key={course._id}
               className="bg-white rounded-xl shadow-md hover:shadow-2xl hover:scale-105 transition-transform duration-300 overflow-hidden group"
             >
-              {/* Thumbnail with gradient overlay */}
+              {/* Thumbnail*/}
               <div className="relative">
                 <img
                   src={course.thumbnail}
@@ -98,7 +98,7 @@ export default function Courses() {
                   {course.description}
                 </p>
 
-                {/* Enroll/Login button */}
+                {/* Enroll-Login button */}
                 <div className="flex justify-center">
                   {user ? (
                     <button

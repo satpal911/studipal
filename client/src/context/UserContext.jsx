@@ -2,6 +2,7 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { API } from "../api";
 
 const UserContext = createContext();
 
@@ -81,7 +82,7 @@ export const UserProvider = ({ children }) => {
     const fetchUser = async () => {
       if (!token) return;
       try {
-        const res = await axios.get("http://localhost:3000/api/v1/user/me", {
+        const res = await axios.get(`${API}/api/v1/user/me`, {
           headers: { Authorization: `Bearer ${token}` },
           withCredentials: true,
         });

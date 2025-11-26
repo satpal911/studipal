@@ -1,75 +1,100 @@
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const Admin = require("../models/admin.model");
-const Course = require("../models/course.model")
-const Mentor = require("../models/mentor.model")
+const Course = require("../models/course.model");
+const Mentor = require("../models/mentor.model");
 const User = require("../models/user.model");
 
-// REGISTER ADMIN
 const registerAdmin = async (req, res) => {
   try {
     const { name, email, password } = req.body;
 
     if (!name || !email || !password) {
-      return res.status(400).json({ status: 0, message: "All fields are required" });
+      return res
+        .status(400)
+        .json({ status: 0, message: "All fields are required" });
     }
 
     const emailLower = email.trim().toLowerCase();
     const existingAdmin = await Admin.findOne({ email: emailLower });
     if (existingAdmin) {
-      return res.status(400).json({ status: 0, message: "Admin already registered" });
+      return res
+        .status(400)
+        .json({ status: 0, message: "Admin already registered" });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    const newAdmin = new Admin({ name, email: emailLower, password: hashedPassword });
+    const newAdmin = new Admin({
+      name,
+      email: emailLower,
+      password: hashedPassword,
+    });
     const savedAdmin = await newAdmin.save();
 
     res.status(201).json({
       status: 1,
       message: "Admin registered successfully",
-      data: { id: savedAdmin._id, name: savedAdmin.name, email: savedAdmin.email },
+      data: {
+        id: savedAdmin._id,
+        name: savedAdmin.name,
+        email: savedAdmin.email,
+      },
     });
   } catch (error) {
-    res.status(500).json({ status: 0, message: `Server error: ${error.message}` });
+    res
+      .status(500)
+      .json({ status: 0, message: `Server error: ${error.message}` });
   }
 };
 
-// LOGIN ADMIN
 const loginAdmin = async (req, res) => {
   try {
     const { email, password } = req.body;
 
     if (!email || !password) {
-      return res.status(400).json({ status: 0, message: "All fields are required" });
+      return res
+        .status(400)
+        .json({ status: 0, message: "All fields are required" });
     }
 
     const emailLower = email.trim().toLowerCase();
     const admin = await Admin.findOne({ email: emailLower });
     if (!admin) {
-      return res.status(400).json({ status: 0, message: "Admin not registered" });
+      return res
+        .status(400)
+        .json({ status: 0, message: "Admin not registered" });
     }
 
     const isMatch = await bcrypt.compare(password, admin.password);
     if (!isMatch) {
-      return res.status(400).json({ status: 0, message: "Email or password is wrong" });
+      return res
+        .status(400)
+        .json({ status: 0, message: "Email or password is wrong" });
     }
 
-    const token = jwt.sign({ id: admin._id, role: "admin" }, process.env.JWT_SECRET, { expiresIn: "7d" });
+    const token = jwt.sign(
+      { id: admin._id, role: "admin" },
+      process.env.JWT_SECRET,
+      { expiresIn: "7d" }
+    );
 
     res.cookie("token", token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
+      secure: process.env.NODE_ENV === "production" ? true : false,
+      sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
-    res.status(200).json({ status: 1, message: "Admin login successful", token });
+    res
+      .status(200)
+      .json({ status: 1, message: "Admin login successful", token });
   } catch (error) {
-    res.status(500).json({ status: 0, message: `Server error: ${error.message}` });
+    res
+      .status(500)
+      .json({ status: 0, message: `Server error: ${error.message}` });
   }
 };
 
-// ADDING MENTOR
 const addMentor = async (req, res) => {
   try {
     const { name, email, password, expertise } = req.body;
@@ -94,7 +119,7 @@ const addMentor = async (req, res) => {
       name,
       email,
       password: hashedPassword,
-      expertise
+      expertise,
     });
 
     const savedMentor = await mentor.save();
@@ -112,21 +137,23 @@ const addMentor = async (req, res) => {
   }
 };
 
-
-//Approve a pending course
 const approveCourse = async (req, res) => {
   try {
     const { id } = req.params; // pending course ID
 
     const pendingCourse = await Course.findById(id);
     if (!pendingCourse || pendingCourse.status !== "pending") {
-      return res.status(404).json({ status: 0, message: "Pending course not found" });
+      return res
+        .status(404)
+        .json({ status: 0, message: "Pending course not found" });
     }
 
     // If this is an update version
     if (pendingCourse.originalCourseId) {
       // Archive old approved course
-      await Course.findByIdAndUpdate(pendingCourse.originalCourseId, { status: "archived" });
+      await Course.findByIdAndUpdate(pendingCourse.originalCourseId, {
+        status: "archived",
+      });
     }
 
     // Approve the pending course
@@ -136,21 +163,24 @@ const approveCourse = async (req, res) => {
     res.status(200).json({
       status: 1,
       message: "Course approved successfully",
-      data: pendingCourse
+      data: pendingCourse,
     });
   } catch (error) {
-    res.status(500).json({ status: 0, message: `Server error: ${error.message}` });
+    res
+      .status(500)
+      .json({ status: 0, message: `Server error: ${error.message}` });
   }
 };
 
-//Reject a pending course
 const rejectCourse = async (req, res) => {
   try {
     const { id } = req.params;
 
     const pendingCourse = await Course.findById(id);
     if (!pendingCourse || pendingCourse.status !== "pending") {
-      return res.status(404).json({ status: 0, message: "Pending course not found" });
+      return res
+        .status(404)
+        .json({ status: 0, message: "Pending course not found" });
     }
 
     pendingCourse.status = "rejected";
@@ -159,21 +189,28 @@ const rejectCourse = async (req, res) => {
     res.status(200).json({
       status: 1,
       message: "Course rejected successfully",
-      data: pendingCourse
+      data: pendingCourse,
     });
   } catch (error) {
-    res.status(500).json({ status: 0, message: `Server error: ${error.message}` });
+    res
+      .status(500)
+      .json({ status: 0, message: `Server error: ${error.message}` });
   }
 };
 
-//GET ADMIN STATS
 const getAdminStats = async (req, res) => {
   try {
     const totalUsers = await User.countDocuments();
     const totalMentors = await Mentor.countDocuments();
-    const totalPendingCourses = await Course.countDocuments({ status: "pending" });
-    const totalApprovedCourses = await Course.countDocuments({ status: "approved" });
-    const totalRejectedCourses = await Course.countDocuments({ status: "rejected" });
+    const totalPendingCourses = await Course.countDocuments({
+      status: "pending",
+    });
+    const totalApprovedCourses = await Course.countDocuments({
+      status: "approved",
+    });
+    const totalRejectedCourses = await Course.countDocuments({
+      status: "rejected",
+    });
     const totalCourses = await Course.countDocuments();
 
     res.status(200).json({
@@ -189,11 +226,12 @@ const getAdminStats = async (req, res) => {
       },
     });
   } catch (error) {
-    res.status(500).json({ status: 0, message: `Server error: ${error.message}` });
+    res
+      .status(500)
+      .json({ status: 0, message: `Server error: ${error.message}` });
   }
 };
 
-// Get all mentors
 const getAllMentors = async (req, res) => {
   try {
     const mentors = await Mentor.find().select("-password"); // exclude password
@@ -211,10 +249,9 @@ const getAllMentors = async (req, res) => {
   }
 };
 
-// Get all courses
 const getAllCourses = async (req, res) => {
   try {
-    const courses = await Course.find().populate("mentor", "name email"); // populate mentor info if needed
+    const courses = await Course.find().populate("mentor", "name email");
     res.json({
       status: 1,
       message: "All courses fetched successfully",
@@ -284,6 +321,15 @@ const updateMentor = async (req, res) => {
   }
 };
 
-
-
-module.exports = { registerAdmin, loginAdmin,approveCourse, rejectCourse, addMentor, getAdminStats, getAllMentors, getAllCourses, deleteMentor, updateMentor};
+module.exports = {
+  registerAdmin,
+  loginAdmin,
+  approveCourse,
+  rejectCourse,
+  addMentor,
+  getAdminStats,
+  getAllMentors,
+  getAllCourses,
+  deleteMentor,
+  updateMentor,
+};
