@@ -10,7 +10,7 @@ adminRouter.post("/register", registerAdmin)
 adminRouter.post("/login", loginAdmin)
 
 adminRouter.get("/me", adminAuthentication, (req, res) => {
-  res.json(req.admin)   // 👈 send admin details (without password)
+  res.json(req.admin)   // send admin details (without password)
 })
 
 adminRouter.post("/add-mentor", addMentor)
