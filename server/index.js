@@ -10,7 +10,6 @@ const enrollRouter = require("./routes/enroll.router.js");
 const contactRouter = require("./routes/contact.router.js");
 require("dotenv").config();
 const cors = require("cors");
-const path = require("path");
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -30,25 +29,17 @@ app.use(
   })
 );
 
+app.use("/api/v1/course", courseRouter);
+app.use("/api/v1/user", userRouter);
+app.use("/api/v1/mentor", mentorRouter);
+app.use("/api/v1/admin", adminRouter);
+app.use("/api/v1/lesson", lessonRouter);
+app.use("/api/v1/user-enroll", enrollRouter);
+app.use("/api/v1/contact", contactRouter);
+
 connectDb()
   .then(() => {
-    app.use("/api/v1/course", courseRouter);
-    app.use("/api/v1/user", userRouter);
-    app.use("/api/v1/mentor", mentorRouter);
-    app.use("/api/v1/admin", adminRouter);
-    app.use("/api/v1/lesson", lessonRouter);
-    app.use("/api/v1/user-enroll", enrollRouter);
-    app.use("/api/v1/contact", contactRouter);
-
-    if (process.env.NODE_ENV === "production") {
-      app.use(express.static(path.join(__dirname, "client/build")));
-
-      // SPA fallback: serve index.html for any unknown route
-      app.get("*", (req, res) => {
-        res.sendFile(path.join(__dirname, "client/build", "index.html"));
-      });
-    }
-
+    console.log("database connected successfully");
     app.listen(port, () => {
       console.log(`database running on port http://localhost:${port}`);
     });
