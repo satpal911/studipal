@@ -9,6 +9,7 @@ const connectDb = require("./database/db");
 const enrollRouter = require("./routes/enroll.router.js");
 const contactRouter = require("./routes/contact.router.js");
 require("dotenv").config();
+const path = require("path")
 const cors = require("cors");
 
 const app = express();
@@ -36,6 +37,16 @@ app.use("/api/v1/admin", adminRouter);
 app.use("/api/v1/lesson", lessonRouter);
 app.use("/api/v1/user-enroll", enrollRouter);
 app.use("/api/v1/contact", contactRouter);
+
+if (process.env.NODE_ENV === "production") {
+  // Serve static files from React build
+  app.use(express.static(path.join(__dirname, "client/build")));
+
+  // SPA fallback: serve index.html for all non-API routes
+  app.get("*", (req, res) => {
+    res.sendFile(path.join(__dirname, "client/build", "index.html"));
+  });
+}
 
 connectDb()
   .then(() => {
