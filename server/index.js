@@ -10,6 +10,7 @@ const enrollRouter = require("./routes/enroll.router.js");
 const contactRouter = require("./routes/contact.router.js");
 require("dotenv").config();
 const cors = require("cors");
+const path = require("path");
 
 const app = express();
 const port = process.env.PORT || 3000;
