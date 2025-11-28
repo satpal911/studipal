@@ -39,6 +39,15 @@ connectDb()
     app.use("/api/v1/user-enroll", enrollRouter);
     app.use("/api/v1/contact", contactRouter);
 
+    if (process.env.NODE_ENV === "production") {
+      app.use(express.static(path.join(__dirname, "client/build")));
+
+      // SPA fallback: serve index.html for any unknown route
+      app.get("*", (req, res) => {
+        res.sendFile(path.join(__dirname, "client/build", "index.html"));
+      });
+    }
+
     app.listen(port, () => {
       console.log(`database running on port http://localhost:${port}`);
     });
