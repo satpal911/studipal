@@ -78,12 +78,10 @@ const loginAdmin = async (req, res) => {
       { expiresIn: "7d" }
     );
 
-    const isProduction = process.env.NODE_ENV === "production";
-
     res.cookie("token", token, {
       httpOnly: true,
-      secure: isProduction, // true ONLY in production
-      sameSite: isProduction ? "None" : "Lax", // None only on HTTPS
+      secure: process.env.NODE_ENV === "production" ? true : false,
+      sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 

@@ -13,10 +13,8 @@ const path = require("path")
 const cors = require("cors");
 
 const app = express();
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 10000;
 
-app.use(express.json());
-app.use(cookieParser());
 app.use(
   cors({
     origin: [
@@ -25,10 +23,14 @@ app.use(
       "https://studipal-2.onrender.com",
     ],
     credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH","OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
+
+app.use(express.json());
+app.use(cookieParser());
+
 
 app.use("/api/v1/course", courseRouter);
 app.use("/api/v1/user", userRouter);
@@ -48,12 +50,14 @@ if (process.env.NODE_ENV === "production") {
   });
 }
 
+ app.listen(port, "0.0.0.0", () => {
+      console.log(`database running on port http://localhost:${port}`);
+    });
+
 connectDb()
   .then(() => {
     console.log("database connected successfully");
-    app.listen(port, () => {
-      console.log(`database running on port http://localhost:${port}`);
-    });
+   
   })
   .catch((error) => {
     console.error("Database connection failed:", error);
