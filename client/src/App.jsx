@@ -85,7 +85,7 @@ export default function App() {
         <Route path="/mentor/dashboard" element={<MentorDashboard />} />
         <Route path="/user/dashboard" element={<Dashboard />} />
 
-        {/* Lessons */}
+        {/* Lessons */ }
         <Route path="/course/:courseId/lessons" element={<CourseLessons />} />
       </Routes>
     </div>
