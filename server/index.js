@@ -40,15 +40,9 @@ app.use("/api/v1/lesson", lessonRouter);
 app.use("/api/v1/user-enroll", enrollRouter);
 app.use("/api/v1/contact", contactRouter);
 
-if (process.env.NODE_ENV === "production") {
-  // Serve static files from React build
-  app.use(express.static(path.join(__dirname, "client/dist")));
-
-  // SPA fallback: serve index.html for all non-API routes
-  app.get("/*", (req, res) => {
-    res.sendFile(path.join(__dirname, "client/dist", "index.html"));
-  });
-}
+app.get("/", (req, res) => {
+  res.send("Server is running!");
+});
 
  app.listen(port, "0.0.0.0", () => {
       console.log(`database running on port http://localhost:${port}`);
