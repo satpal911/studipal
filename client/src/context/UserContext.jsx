@@ -18,7 +18,7 @@ export const UserProvider = ({ children }) => {
     try {
       setLoading(true);
       const res = await axios.post(
-        `${API}/api/v1/user/register`,
+        `${API}/api/v1/user/register`,  //update path
         { name, email, password },
         { withCredentials: true }
       );
