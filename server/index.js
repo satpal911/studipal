@@ -43,7 +43,7 @@ app.use("/api/v1/contact", contactRouter);
 
 if (process.env.NODE_ENV === "production") {
   // Serve static files from React build
-  app.use(express.static(path.join(__dirname, "client/build")));
+  app.use(express.static(path.join(__dirname, "client/dist")));
 
   // SPA fallback: serve index.html for all non-API routes
   app.get("*", (req, res) => {
